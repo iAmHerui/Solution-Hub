@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.h3c.solutionhub.mapper.FileManagementMapper">
+
+    <insert id="insertFileInfo" >
+        INSERT INTO  file_management (
+            file_type,
+            product_type,
+            file_name,
+            product_version,
+            file_size
+        ) VALUES (
+            #{fileType,jdbcType=VARCHAR},
+            #{productType,jdbcType=VARCHAR},
+            #{fileName,jdbcType=VARCHAR},
+            #{productVersion,jdbcType=VARCHAR},
+            #{fileSize,jdbcType=INTEGER}
+        )
+    </insert>
+
+    <delete id="deleteFileInfo">
+        DELETE FROM file_management WHERE name = #{fileName,jdbcType=VARCHAR}
+    </delete>
+
+</mapper>

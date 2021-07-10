@@ -1,6 +1,8 @@
 package com.h3c.solutionhub.common;
 
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.google.gson.Gson;
 import com.h3c.solutionhub.config.HttpsClientRequestFactory;
 import org.junit.Test;
@@ -273,5 +275,15 @@ public class RestTemplateTest {
         String token = response.getHeaders().get("X-Auth-Token").get(0);
 
 
+    }
+
+    @Test
+    public void stringToJson() {
+        String test = "{\"@odata.context\":\"/redfish/v1/$metadata#NetworkPort.NetworkPort\",\"@odata.etag\":\"W/\\\"1625801163\\\"\",\"@odata.id\":\"/redfish/v1/Chassis/1/NetworkAdapters/PCIeSlot1/NetworkPorts/1\",\"@odata.type\":\"#NetworkPort.v1_1_0.NetworkPort\",\"AssociatedNetworkAddresses\":[\"54:2B:DE:0B:F1:BC\"],\"Id\":\"1\",\"LinkStatus\":\"N/A\",\"Name\":\"1\",\"Oem\":{\"Public\":{\"BDF\":\"0000:5E:00.0\",\"PortType\":\"OpticalPort\"}},\"PhysicalPortNumber\":\"1\"}";
+
+        JSONObject resultJson = JSON.parseObject(test);
+        System.out.println(resultJson.get("AssociatedNetworkAddresses"));
+        System.out.println(resultJson.getJSONArray("AssociatedNetworkAddresses").get(0));
+        System.out.println(resultJson.get("Id"));
     }
 }

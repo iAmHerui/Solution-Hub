@@ -23,7 +23,7 @@ var uploader = WebUploader.create({
     // swf文件路径
     swf: '/webuploader-0.1.5/Uploader.swf',
     // 文件接收服务端。
-    server: './upload/upload',
+    server: './fileManagement/upload',
     formData:{
     	guid : GUID
     },
@@ -89,7 +89,7 @@ $("#ctlBtn").click(function () {
     // 文件上传成功，给item添加成功class, 用样式标记上传成功。
     uploader.on('uploadSuccess', function (file, response) {
         $('#' + file.id).find('p.state').text('已上传');
-        $.post('/upload/merge', { guid: GUID, fileName: file.name }, function (data) {
+        $.post('/fileManagement/merge', { guid: GUID, fileName: file.name }, function (data) {
             $("#uploader").children("#" + file.id).children(".state").html("上传成功...");
 //$("#uploader .state").html("上传成功...");
         });

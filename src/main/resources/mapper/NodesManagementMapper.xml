@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.h3c.solutionhub.mapper.NodesManagementMapper">
+
+    <insert id="insertNodeInfo" >
+        INSERT INTO  node_management (
+            node_name,
+            node_hdm_ip,
+            node_type,
+            node_status,
+            node_hdm_password,
+            management_ip,
+            business_ip,
+            management_gateway,
+            business_gateway
+        ) VALUES (
+            #{nodeName,jdbcType=VARCHAR},
+            #{nodeHDMIP,jdbcType=VARCHAR},
+            #{nodeType,jdbcType=VARCHAR},
+            #{nodeStatus,jdbcType=VARCHAR},
+            #{nodeHDMPaasword,jdbcType=VARCHAR},
+            #{managementIP,jdbcType=VARCHAR},
+            #{businessIP,jdbcType=VARCHAR},
+            #{managementGateway,jdbcType=VARCHAR},
+            #{businessGateway,jdbcType=VARCHAR}
+        )
+    </insert>
+
+    <delete id="deleteNodeInfo">
+        DELETE FROM node_management WHERE name = #{nodeName,jdbcType=VARCHAR}
+    </delete>
+</mapper>

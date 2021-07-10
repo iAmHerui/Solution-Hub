@@ -1,11 +1,15 @@
 package com.h3c.solutionhub.controller;
 
 import com.h3c.solutionhub.common.JsonResult;
+import com.h3c.solutionhub.entity.FileBO;
+import com.h3c.solutionhub.service.FileManagementService;
 import com.h3c.solutionhub.service.UploadFileService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.apache.commons.io.FileUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.*;
@@ -21,11 +25,16 @@ import java.util.Map;
 @Api(value = "文件管理",tags = "文件管理")
 @RestController
 @CrossOrigin
-@RequestMapping(value = "/upload")
+@RequestMapping(value = "/fileManagement")
 public class FileManagementController {
+
+    private static final Logger log = LoggerFactory.getLogger(FileManagementController.class);
 
     @Autowired
     UploadFileService uploadFileService;
+
+    @Autowired
+    FileManagementService fileManagementService;
 
     @Value("${uploadFolder}")
     private String filePath;
@@ -85,19 +94,19 @@ public class FileManagementController {
      * 合并文件
      *
      * @param guid
-     * @param fileName
+     * @param fileBO
      * @throws Exception
      */
     @RequestMapping("/merge")
     @ResponseBody
-    public JsonResult mergeFile(String guid, String fileName) {
+    public JsonResult mergeFile(String guid,
+                                FileBO fileBO) {
         // 得到 destTempFile 就是最终的文件
         try {
             File parentFileDir = new File(filePath + guid);
             if (parentFileDir.isDirectory()) {
-//                File destTempFile = new File(filePath + "/merge", UUID.randomUUID() + fileName);
-                File destTempFile = new File(filePath + "/merge", fileName);
-                // 如果该文件已存在，则分片数据进行合入，进行文件覆盖
+                File destTempFile = new File(filePath + "/merge", fileBO.getFileName());
+                // 文件是否已存在？
                 if (!destTempFile.exists()) {
                     //先得到文件的上级目录，并创建上级目录，在创建文件,
                     destTempFile.getParentFile().mkdir();
@@ -116,13 +125,17 @@ public class FileManagementController {
                         FileUtils.copyFile(partFile, destTempfos);
                         destTempfos.close();
                     }
+
+                    // 录入数据库
+                    fileManagementService.insertFileInfo(fileBO);
+
                     // 删除临时目录中的分片文件
                     FileUtils.deleteDirectory(parentFileDir);
                     return JsonResult.success();
                 } else {
                     // 删除临时目录中的分片文件
                     FileUtils.deleteDirectory(parentFileDir);
-                    System.out.println("文件已存在！");
+                    log.error("文件已存在！");
                     return JsonResult.failMessage("文件已存在！");
                 }
             }
@@ -131,5 +144,13 @@ public class FileManagementController {
             return JsonResult.fail();
         }
         return null;
+    }
+
+
+
+    @ApiOperation(value = "文件删除",notes = "文件删除")
+    @PostMapping(value = "/fileDelete")
+    public Boolean fileDelete(String fileName) {
+        return fileManagementService.deleteFileInfo(fileName);
     }
 }
