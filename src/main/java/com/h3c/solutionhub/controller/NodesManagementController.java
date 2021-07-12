@@ -38,9 +38,8 @@ public class NodesManagementController {
 
     @ApiOperation(value = "节点部署",notes = "节点部署")
     @PostMapping(value = "/nodeDeploy")
-    public JsonResult nodeDeploy() {
-        // TODO
-        return JsonResult.success();
+    public Boolean nodeDeploy() {
+        return nodesManagementService.deployNode();
     }
 
 }

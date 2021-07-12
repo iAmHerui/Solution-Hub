@@ -63,10 +63,18 @@ public class NodesManagementServiceImpl implements NodesManagementService {
         createConfFile("","","",2);
 
         // 4.执行mount
+        execLinuxCommand("mount ???");
+
         // 5.生成配置文件 grub.cfg-宿主机IP16进制
+        createGrubConfFile("","grub.cfg","");
+
         // 6.PXE模式执行
+        startPXE(token);
+
         // 7.重启
-        return null;
+        reboot(token);
+
+        return true;
     }
 
 
@@ -92,6 +100,42 @@ public class NodesManagementServiceImpl implements NodesManagementService {
         return resultJson.getJSONArray("AssociatedNetworkAddresses").get(0).toString();
     }
 
+    private void startPXE(String token) {
+        String url = "https://"+deviceIP+"/redfish/v1/Systems/system_id";
+
+        HashMap<String, Object> map = new HashMap<>();
+        map.put("AssetTag","test_123");
+        map.put("HostName","HDM12315555777745557765");
+
+        HashMap<String, Object> childMap = new HashMap<>();
+        childMap.put("BootSourceOverrideMode","UEFI");
+        childMap.put("BootSourceOverrideTarget","Pxe");
+        childMap.put("BootSourceOverrideEnabled","Once");
+
+        map.put("Boot",childMap);
+
+        restTemplateTool.sendHttps(url,map,HttpMethod.PATCH,token);
+
+
+    }
+
+    private void reboot(String token) {
+        String url = "https://"+deviceIP+"/redfish/v1/Systems/system_id/Actions/ComputerSystem.Reset";
+
+        HashMap<String, Object> map = new HashMap<>();
+        map.put("ResetType","GracefulShutdown");
+
+        restTemplateTool.sendHttps(url,map,HttpMethod.PATCH,token);
+    }
+
+    /**
+     * 生成配置文件dhcpd.conf
+     *
+     * @param ip1
+     * @param ip2
+     * @param ip3
+     * @param nodes
+     */
     private void createConfFile(
             String ip1,
             String ip2,
@@ -127,12 +171,59 @@ public class NodesManagementServiceImpl implements NodesManagementService {
 
         }
 
-        createFile(confInfo);
+        createFile(confInfo,"dhcpd.conf");
     }
 
-    private void createFile(String fileInfo) {
+    /**
+     * 生成配置文件grub.cfg
+     *
+     * @param ip1
+     * @param fileName
+     * @param filePath
+     */
+    private void createGrubConfFile(
+            String ip1,
+            String fileName,
+            String filePath) {
+
+        String fileInfo =
+                "set default=\"0\"\n"+
+                        "\n"+
+                        "function load_video {\n"+
+                        "   insmod efi_gop\n"+
+                        "   insmod efi_uga\n"+
+                        "   insmod video_bochs\n"+
+                        "   insmod video_cirrus\n"+
+                        "   insmod all_video\n"+
+                        "}\n"+
+                        "\n"+
+                        "load_video\n"+
+                        "set gfxpayload=keep\n"+
+                        "insmod gzio\n"+
+                        "insmod part_gpt\n"+
+                        "insmod ext2\n"+
+                        "\n"+
+                        "set timeout=5\n"+
+                        "\n"+
+                        "search --no-floppy --set=root -l 'CentOS 7 x86_64'\n"+
+                        "\n"+
+                        "menuentry 'Install CAS-x86_64' --class fedora --class gnu-linux --class gnu --class os {\n"+
+                        "       linuxefi /images/pxeboot/vmlinuz\n"+
+                        "       inst.stage2=http://"+ip1+fileName+"\n"+
+                        "       inst.ks=http://"+ip1+filePath+"\n"+
+                        "       net.ifnames=0\n"+
+                        "       biosdevname=0\n"+
+                        "       quiet\n"+
+                        "       initrdefi /images/pxeboot/initrd.img\n"+
+                        "}\n";
+
+        //TODO ip16进制
+        createFile(fileInfo,fileName+"-"+to16(ip1));
+    }
+
+    private void createFile(String fileInfo,String fileName) {
         try {
-            String filePath = confFilePath+"dhcpd.conf";
+            String filePath = confFilePath+fileName;
             File file = new File(filePath);
             if (!file.exists()) {
                 file.getParentFile().mkdirs();
@@ -149,7 +240,31 @@ public class NodesManagementServiceImpl implements NodesManagementService {
         }
     }
 
-    private void execLinuxCommend() {
-        // TODO 执行mount
+    private void execLinuxCommand(String command) {
+        Runtime run = Runtime.getRuntime();
+        Process process = null;
+
+        try {
+            process = run.exec(command);
+            process.waitFor();
+            process.destroy();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
     }
+
+    private String to16(String ipString) {
+            String[] ip=ipString.split("\\.");
+            StringBuffer sb=new StringBuffer();
+            for (String str : ip) {
+                sb.append(Integer.toHexString(Integer.parseInt(str)));
+            }
+            return sb.toString();
+    }
+
+
+
 }
