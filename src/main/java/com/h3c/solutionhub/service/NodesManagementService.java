@@ -7,6 +7,8 @@ import java.util.List;
 
 public interface NodesManagementService {
 
+    List<NodeBo> getNodeList();
+
     Boolean insertNode(NodeBo nodeBo);
 
     Boolean deleteNode(String nodeName);
@@ -14,5 +16,7 @@ public interface NodesManagementService {
     Boolean deployNode(
             String dhcpIPPond,
             String dhcpMask,
+            String productType,
+            String productVersion,
             List<NodeBo> nodes);
 }

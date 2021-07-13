@@ -8,18 +8,35 @@
             product_type,
             file_name,
             product_version,
-            file_size
+            file_size,
+            file_path
         ) VALUES (
             #{fileType,jdbcType=VARCHAR},
             #{productType,jdbcType=VARCHAR},
             #{fileName,jdbcType=VARCHAR},
             #{productVersion,jdbcType=VARCHAR},
-            #{fileSize,jdbcType=INTEGER}
+            #{fileSize,jdbcType=INTEGER},
+            #{filePath,jdbcType=VARCHAR}
         )
     </insert>
 
     <delete id="deleteFileInfo">
         DELETE FROM file_management WHERE name = #{fileName,jdbcType=VARCHAR}
     </delete>
+    
+    <select id="selectFilePath" resultType="string">
+        SELECT file_path
+        FROM file_management
+        WHERE file_name = #{fileName}
+    </select>
+
+    <select id="getISOName" resultType="string">
+        SELECT file_name
+        FROM file_management
+        WHERE
+            product_type = #{productType} and
+            product_version = #{productVersion} and
+            file_type = 'iso'
+    </select>
 
 </mapper>

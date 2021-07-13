@@ -7,4 +7,6 @@ public interface FileManagementService {
     Boolean insertFileInfo(FileBO fileBO);
 
     Boolean deleteFileInfo(String fileName);
+
+    Boolean mergeFile(String guid, FileBO fileBO);
 }

@@ -4,9 +4,9 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.h3c.solutionhub.common.RestTemplateTool;
 import com.h3c.solutionhub.entity.NodeBo;
+import com.h3c.solutionhub.mapper.FileManagementMapper;
 import com.h3c.solutionhub.mapper.NodesManagementMapper;
 import com.h3c.solutionhub.service.NodesManagementService;
-import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpMethod;
@@ -14,22 +14,27 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.io.*;
+import java.net.Inet4Address;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.HashMap;
 import java.util.List;
 
 @Service
 public class NodesManagementServiceImpl implements NodesManagementService {
 
-    @Value("${deviceIP}")
-    private String deviceIP;
-
-    @Value("${uploadFolder}")
-    private String confFilePath;
-
     @Autowired
     private NodesManagementMapper nodesManagementMapper;
 
+    @Autowired
+    private FileManagementMapper fileManagementMapper;
+
     RestTemplateTool restTemplateTool = new RestTemplateTool();
+
+    @Override
+    public List<NodeBo> getNodeList() {
+        return nodesManagementMapper.getNodeList();
+    }
 
     @Override
     public Boolean insertNode(NodeBo nodeBo) {
@@ -42,6 +47,8 @@ public class NodesManagementServiceImpl implements NodesManagementService {
                 nodeBo.getNodeHDMPaasword(),
                 nodeBo.getManagementIP(),
                 nodeBo.getBusinessIP(),
+                nodeBo.getManagementMask(),
+                nodeBo.getBusinessMask(),
                 nodeBo.getManagementGateway(),
                 nodeBo.getBusinessGateway());
     }
@@ -55,35 +62,42 @@ public class NodesManagementServiceImpl implements NodesManagementService {
     public Boolean deployNode(
             String dhcpIPPond,
             String dhcpMask,
+            String productType,
+            String productVersion,
             List<NodeBo> nodes) {
-        // 1.获取token
-        String token = getToken();
 
-        // 2.获取管理节点mac
-        String mac = getManageNodeMac(token);
+        for(NodeBo node:nodes) {
+            // 1.获取token
+            String token = getToken(node.getManagementIP());
+            node.setToken(token);
+
+            // 2.获取管理节点mac
+            String mac = getManageNodeMac(node.getManagementIP(),token);
+            node.setManagementMAC(mac);
+        }
 
         // 3.生成配置文件dhcpd.conf
-        // TODO 从数据库查
-        createConfFile("","",null);
+        createConfFile(dhcpIPPond,dhcpMask,nodes);
 
-        // 4.创建子目录（/var/www/html/UUID/）执行mount
-        execLinuxCommand("mount ???");
+        // TODO 4.创建子目录（/var/www/html/UUID/）执行mount
+//        execLinuxCommand("mount ???");
 
         // 5.生成配置文件 grub.cfg-宿主机IP16进制
-        createGrubConfFile("","grub.cfg","");
+        createGrubConfFile(productType,productVersion);
 
-        // 6.PXE模式执行
-        startPXE(token);
+        for(NodeBo node:nodes) {
+            // 6.PXE模式执行
+            startPXE(node.getManagementIP(),node.getToken());
 
-        // 7.重启
-        reboot(token);
-
+            // 7.重启
+            reboot(node.getManagementIP(),node.getToken());
+        }
         return true;
     }
 
 
-    private String getToken() {
-        String url = "https://"+deviceIP+"/redfish/v1/SessionService/Sessions";
+    private String getToken(String nodeMangeIP) {
+        String url = "https://"+nodeMangeIP+"/redfish/v1/SessionService/Sessions";
 
         HashMap<String, Object> map = new HashMap<>();
         map.put("UserName","admin");
@@ -94,8 +108,8 @@ public class NodesManagementServiceImpl implements NodesManagementService {
         return responseEntity.getHeaders().get("X-Auth-Token").get(0);
     }
 
-    private String getManageNodeMac(String token) {
-        String url = "https://"+deviceIP+"/redfish/v1/Chassis/1/NetworkAdapters/PCIeSlot1/NetworkPorts/1";
+    private String getManageNodeMac(String nodeMangeIP,String token) {
+        String url = "https://"+nodeMangeIP+"/redfish/v1/Chassis/1/NetworkAdapters/PCIeSlot1/NetworkPorts/1";
 
         ResponseEntity responseEntity =restTemplateTool.sendHttps(url,null, HttpMethod.GET,token);
 
@@ -104,8 +118,8 @@ public class NodesManagementServiceImpl implements NodesManagementService {
         return resultJson.getJSONArray("AssociatedNetworkAddresses").get(0).toString();
     }
 
-    private void startPXE(String token) {
-        String url = "https://"+deviceIP+"/redfish/v1/Systems/1";
+    private void startPXE(String nodeMangeIP,String token) {
+        String url = "https://"+nodeMangeIP+"/redfish/v1/Systems/1";
 
         HashMap<String, Object> map = new HashMap<>();
 
@@ -121,8 +135,8 @@ public class NodesManagementServiceImpl implements NodesManagementService {
 
     }
 
-    private void reboot(String token) {
-        String url = "https://"+deviceIP+"/redfish/v1/Systems/system_id/Actions/ComputerSystem.Reset";
+    private void reboot(String nodeMangeIP,String token) {
+        String url = "https://"+nodeMangeIP+"/redfish/v1/Systems/system_id/Actions/ComputerSystem.Reset";
 
         HashMap<String, Object> map = new HashMap<>();
         map.put("ResetType","ForceRestart");
@@ -132,57 +146,47 @@ public class NodesManagementServiceImpl implements NodesManagementService {
 
     /**
      * 生成配置文件dhcpd.conf
-     *
-     * @param nodes
      */
     private void createConfFile(
             String dhcpIPPond,
             String dhcpMask,
-            List<NodeBo> nodes) {
-
-//        String ip1 = "170.0.0.0";
-//        String ip2 = "255.255.255.0";
-//        String ip3 = "170.0.0.227";
-//        int nodes = 2;
-//        String mac1 = "54:2b:de:0b:f1:bc";
-//        String ip4 = "170.0.0.142;";
-
-        String confInfo =
-                "default-lease-time 600;\n"+
-                "max-lease-time 7200;\n"+
-                "subnet "+dhcpIPPond+" netmask "+dhcpMask +" {\n"+
-                "filename \"BOOTX64.EFI\"\n"+
-                "next-server "+"agent所在主机地址"+";\n"+
-                "}\n";
-
-//        for(int i=1;i<nodes+1;i++) {
-//
-//            String mac1 = "54:2b:de:0b:f1:bc";//根据CVK管理IP获取
-//            String ip4 = "170.0.0.142";//管理IP
-//
-//            String confNodeInfo =
-//                    "host solution-test"+i+" {\n"+
-//                    "    hardware ethernet "+mac1+";\n"+
-//                    "    fixed-address "+ip4+";\n"+
-//                    "}\n";
-//            confInfo=confInfo+confNodeInfo;
-//
-//        }
-
-        createFile(confInfo,"dhcpd.conf");
+            List<NodeBo> nodeList) {
+        String filePath = "/etc/dhcp/dhcpd.conf";
+        File file = new File(filePath);
+        String confInfo ="";
+        if(!file.exists()) {
+            confInfo =
+                    "default-lease-time 600;\n" +
+                            "max-lease-time 7200;\n" +
+                            "subnet " + dhcpIPPond + " netmask " + dhcpMask + " {\n" +
+                            "filename \"BOOTX64.EFI\"\n" +
+                            "next-server " + hostIP() + ";\n" +
+                            "}\n";
+        }
+        for(NodeBo nodeBo:nodeList) {
+            String mac = nodeBo.getManagementMAC();
+            String ip = nodeBo.getManagementIP();
+            String confNodeInfo =
+                    "host "+nodeBo.getNodeName()+ " {\n"+
+                            "    hardware ethernet "+mac+";\n"+
+                            "    fixed-address "+ip+";\n"+
+                            "}\n";
+            confInfo=confInfo+confNodeInfo;
+        }
+        createFile(confInfo,filePath);
     }
 
     /**
      * 生成配置文件grub.cfg
-     *
-     * @param ip1
-     * @param fileName
-     * @param filePath
      */
-    private void createGrubConfFile(
-            String ip1,
-            String fileName,
-            String filePath) {
+    private void createGrubConfFile(String productType, String productVersion) {
+
+        String isoName = fileManagementMapper.getISOName(productType,productVersion);
+        // iso所在目录 版本号+iso前缀名称
+        String prefixName = isoName.substring(0,isoName.lastIndexOf("."));
+
+        // ks-auto.cfg相对路径 版本号+/ks/ks-auto.cfg
+
 
         String fileInfo =
                 "set default=\"0\"\n"+
@@ -207,8 +211,8 @@ public class NodesManagementServiceImpl implements NodesManagementService {
                         "\n"+
                         "menuentry 'Install CAS-x86_64' --class fedora --class gnu-linux --class gnu --class os {\n"+
                         "       linuxefi /images/pxeboot/vmlinuz\n"+
-                        "       inst.stage2=http://"+ip1+fileName+"\n"+
-                        "       inst.ks=http://"+ip1+filePath+"\n"+
+                        "       inst.stage2=http://"+hostIP()+"/"+prefixName+"\n"+
+                        "       inst.ks=http://"+hostIP()+"/"+productVersion+"/ks/ks-auto.cfg"+"\n"+
                         "       net.ifnames=0\n"+
                         "       biosdevname=0\n"+
                         "       quiet\n"+
@@ -216,12 +220,11 @@ public class NodesManagementServiceImpl implements NodesManagementService {
                         "}\n";
 
         //TODO ip16进制
-        createFile(fileInfo,fileName+"-"+to16(ip1));
+        createFile(fileInfo,"/var/lib/tftp/EFI/BOOT/grub.cfg"+"-"+to16(hostIP()));
     }
 
-    private void createFile(String fileInfo,String fileName) {
+    private void createFile(String fileInfo,String filePath) {
         try {
-            String filePath = confFilePath+fileName;
             File file = new File(filePath);
             if (!file.exists()) {
                 file.getParentFile().mkdirs();
@@ -263,6 +266,14 @@ public class NodesManagementServiceImpl implements NodesManagementService {
             return sb.toString();
     }
 
-
+    private String hostIP() {
+        InetAddress ip4 = null;
+        try {
+            ip4 = Inet4Address.getLocalHost();
+        } catch (UnknownHostException e) {
+            e.printStackTrace();
+        }
+        return ip4.getHostAddress();
+    }
 
 }

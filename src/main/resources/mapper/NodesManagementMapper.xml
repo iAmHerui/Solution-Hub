@@ -2,6 +2,22 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.h3c.solutionhub.mapper.NodesManagementMapper">
 
+    <select id="getNodeList" resultType="com.h3c.solutionhub.entity.NodeBo">
+        SELECT
+            node_name as nodeName,
+            node_hdm_ip as nodeHDMIP,
+            node_type as nodeType,
+            node_status as nodeStatus,
+            node_hdm_password as nodeHDMPaasword,
+            management_ip as managementIP,
+            business_ip as businessIP,
+            management_mask as managementMask,
+            business_mask as businessMask,
+            management_gateway as managementGateway,
+            business_gateway as businessGateway
+        FROM node_management
+    </select>
+
     <insert id="insertNodeInfo" >
         INSERT INTO  node_management (
             node_name,
@@ -11,6 +27,8 @@
             node_hdm_password,
             management_ip,
             business_ip,
+            management_mask,
+            business_mask,
             management_gateway,
             business_gateway
         ) VALUES (
@@ -21,6 +39,8 @@
             #{nodeHDMPaasword,jdbcType=VARCHAR},
             #{managementIP,jdbcType=VARCHAR},
             #{businessIP,jdbcType=VARCHAR},
+            #{managementMask,jdbcType=VARCHAR},
+            #{businessMask,jdbcType=VARCHAR},
             #{managementGateway,jdbcType=VARCHAR},
             #{businessGateway,jdbcType=VARCHAR}
         )

@@ -19,4 +19,7 @@ public class FileBO {
 
     // 文件大小(KB)
     private int fileSize;
+
+    // 文件路径
+    private String filePath;
 }

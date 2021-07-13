@@ -35,5 +35,11 @@ public class FileTest {
         strReplace.replaceStr(new File("D:/dhcpd.conf"),"default-lease-time","herui");
     }
 
+    @Test
+    public void suffix() {
+        String isoName = "CenOS.iso";
+        System.out.println(isoName.substring(0,isoName.lastIndexOf(".")));
+    }
+
 
 }
