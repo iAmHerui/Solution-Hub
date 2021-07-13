@@ -8,10 +8,9 @@ import io.swagger.annotations.ApiOperation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @Api(value = "节点管理",tags = "节点管理")
 @RestController
@@ -23,6 +22,12 @@ public class NodesManagementController {
 
     @Autowired
     NodesManagementService nodesManagementService;
+
+    @ApiOperation(value = "节点列表",notes = "节点列表")
+    @GetMapping(value = "nodeList")
+    public List<NodeBo> nodeList() {
+        return null;
+    }
 
     @ApiOperation(value = "节点添加",notes = "节点添加")
     @PostMapping(value = "/nodeAdd")
@@ -38,8 +43,11 @@ public class NodesManagementController {
 
     @ApiOperation(value = "节点部署",notes = "节点部署")
     @PostMapping(value = "/nodeDeploy")
-    public Boolean nodeDeploy() {
-        return nodesManagementService.deployNode();
+    public Boolean nodeDeploy(
+            String dhcpIPPond,
+            String dhcpMask,
+            List<NodeBo> nodes) {
+        return nodesManagementService.deployNode(dhcpIPPond,dhcpMask,nodes);
     }
 
 }

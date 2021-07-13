@@ -26,6 +26,12 @@ public class NodeBo {
     // 节点业务IP
     private String businessIP;
 
+    // 节点管理掩码
+    private String manageMask;
+
+    // 节点业务掩码
+    private String businessMask;
+
     // 节点管理网关
     private String managementGateway;
 

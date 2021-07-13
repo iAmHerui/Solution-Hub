@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 
 import java.io.*;
 import java.util.HashMap;
+import java.util.List;
 
 @Service
 public class NodesManagementServiceImpl implements NodesManagementService {
@@ -51,7 +52,10 @@ public class NodesManagementServiceImpl implements NodesManagementService {
     }
 
     @Override
-    public Boolean deployNode() {
+    public Boolean deployNode(
+            String dhcpIPPond,
+            String dhcpMask,
+            List<NodeBo> nodes) {
         // 1.获取token
         String token = getToken();
 
@@ -60,9 +64,9 @@ public class NodesManagementServiceImpl implements NodesManagementService {
 
         // 3.生成配置文件dhcpd.conf
         // TODO 从数据库查
-        createConfFile("","","",2);
+        createConfFile("","",null);
 
-        // 4.执行mount
+        // 4.创建子目录（/var/www/html/UUID/）执行mount
         execLinuxCommand("mount ???");
 
         // 5.生成配置文件 grub.cfg-宿主机IP16进制
@@ -101,11 +105,9 @@ public class NodesManagementServiceImpl implements NodesManagementService {
     }
 
     private void startPXE(String token) {
-        String url = "https://"+deviceIP+"/redfish/v1/Systems/system_id";
+        String url = "https://"+deviceIP+"/redfish/v1/Systems/1";
 
         HashMap<String, Object> map = new HashMap<>();
-        map.put("AssetTag","test_123");
-        map.put("HostName","HDM12315555777745557765");
 
         HashMap<String, Object> childMap = new HashMap<>();
         childMap.put("BootSourceOverrideMode","UEFI");
@@ -123,7 +125,7 @@ public class NodesManagementServiceImpl implements NodesManagementService {
         String url = "https://"+deviceIP+"/redfish/v1/Systems/system_id/Actions/ComputerSystem.Reset";
 
         HashMap<String, Object> map = new HashMap<>();
-        map.put("ResetType","GracefulShutdown");
+        map.put("ResetType","ForceRestart");
 
         restTemplateTool.sendHttps(url,map,HttpMethod.PATCH,token);
     }
@@ -131,16 +133,12 @@ public class NodesManagementServiceImpl implements NodesManagementService {
     /**
      * 生成配置文件dhcpd.conf
      *
-     * @param ip1
-     * @param ip2
-     * @param ip3
      * @param nodes
      */
     private void createConfFile(
-            String ip1,
-            String ip2,
-            String ip3,
-            int nodes) {
+            String dhcpIPPond,
+            String dhcpMask,
+            List<NodeBo> nodes) {
 
 //        String ip1 = "170.0.0.0";
 //        String ip2 = "255.255.255.0";
@@ -152,24 +150,24 @@ public class NodesManagementServiceImpl implements NodesManagementService {
         String confInfo =
                 "default-lease-time 600;\n"+
                 "max-lease-time 7200;\n"+
-                "subnet "+ip1+" netmask "+ip2 +" {\n"+
+                "subnet "+dhcpIPPond+" netmask "+dhcpMask +" {\n"+
                 "filename \"BOOTX64.EFI\"\n"+
-                "next-server "+ip3+";\n"+
+                "next-server "+"agent所在主机地址"+";\n"+
                 "}\n";
 
-        for(int i=1;i<nodes+1;i++) {
-
-            String mac1 = "54:2b:de:0b:f1:bc";
-            String ip4 = "170.0.0.142";
-
-            String confNodeInfo =
-                    "host solution-test"+i+" {\n"+
-                    "    hardware ethernet "+mac1+";\n"+
-                    "    fixed-address "+ip4+";\n"+
-                    "}\n";
-            confInfo=confInfo+confNodeInfo;
-
-        }
+//        for(int i=1;i<nodes+1;i++) {
+//
+//            String mac1 = "54:2b:de:0b:f1:bc";//根据CVK管理IP获取
+//            String ip4 = "170.0.0.142";//管理IP
+//
+//            String confNodeInfo =
+//                    "host solution-test"+i+" {\n"+
+//                    "    hardware ethernet "+mac1+";\n"+
+//                    "    fixed-address "+ip4+";\n"+
+//                    "}\n";
+//            confInfo=confInfo+confNodeInfo;
+//
+//        }
 
         createFile(confInfo,"dhcpd.conf");
     }
