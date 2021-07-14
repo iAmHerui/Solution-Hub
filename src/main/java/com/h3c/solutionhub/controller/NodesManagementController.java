@@ -24,9 +24,28 @@ public class NodesManagementController {
         return nodesManagementService.getNodeList();
     }
 
+    /**
+     * 节点添加
+     *
+     * @param nodeBo 除了token，都要传
+     * @return
+     */
     @ApiOperation(value = "节点添加",notes = "节点添加")
     @PostMapping(value = "/nodeAdd")
     public Boolean nodeAdd(NodeBo nodeBo) {
+        /** test **/
+        nodeBo.setNodeName("cas-node1");
+        nodeBo.setNodeHDMIP("172.17.0.2");
+        nodeBo.setNodeType("CAS");
+        nodeBo.setNodeStatus("空闲");
+        nodeBo.setNodeHDMPaasword("Password@_");
+        nodeBo.setManagementIP("192.168.0.2");
+        nodeBo.setBusinessIP("192.168.1.2");
+        nodeBo.setManagementMask("255.255.255.0");
+        nodeBo.setBusinessMask("255.255.255.0");
+        nodeBo.setManagementGateway("192.168.0.1");
+        nodeBo.setBusinessGateway("192.168.1.1");
+        /** test **/
         return nodesManagementService.insertNode(nodeBo);
     }
 

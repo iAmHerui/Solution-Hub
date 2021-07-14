@@ -41,5 +41,15 @@ public class FileTest {
         System.out.println(isoName.substring(0,isoName.lastIndexOf(".")));
     }
 
+    @Test
+    public void fileTest() throws Exception {
+        String filePath = "D:/var/"+"www/html/E0701/ks";
+        File destTempFile = new File(filePath,"ks-auto.cfg");
+        System.out.println(destTempFile.getParentFile());
+        destTempFile.getParentFile().mkdir();
+        System.out.println(destTempFile.getAbsoluteFile());
+        System.out.println(destTempFile.getCanonicalFile());
+
+    }
 
 }

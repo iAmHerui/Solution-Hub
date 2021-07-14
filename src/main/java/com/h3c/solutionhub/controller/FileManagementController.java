@@ -82,6 +82,10 @@ public class FileManagementController {
     @RequestMapping("/merge")
     @ResponseBody
     public Boolean mergeFile(String guid, FileBO fileBO) {
+//        /** test **/
+//        fileBO.setFileName("CentOS7.3.iso");
+//        fileBO.setProductVersion("E0701");
+//        /** test **/
         return fileManagementService.mergeFile(guid,fileBO);
     }
 

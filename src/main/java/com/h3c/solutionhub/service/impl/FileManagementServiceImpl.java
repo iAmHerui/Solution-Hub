@@ -61,18 +61,18 @@ public class FileManagementServiceImpl implements FileManagementService {
 
             // iso和cfg要放在不同的目录下
             if(suffix.equals("iso")) {
-                File parentFileDir = new File(tempFilePath);
+                File parentFileDir = new File(tempFilePath+guid);
                 if(parentFileDir.isDirectory()) {
-                    String filePath = tempFilePath+"/iso/"+fileBO.getProductVersion();
+                    String filePath = tempFilePath+"iso/"+fileBO.getProductVersion();
                     fileBO.setFilePath(filePath);
                     File destTempFile = new File(filePath,fileBO.getFileName());
                     // 创建文件
                     createFile(destTempFile,parentFileDir,guid);
                 }
             } else if(suffix.equals("cfg")) {
-                File parentFileDir = new File(tempFilePath);
+                File parentFileDir = new File(tempFilePath+guid);
                 if(parentFileDir.isDirectory()) {
-                    String filePath = tempFilePath+"/www/html/"+fileBO.getProductVersion()+"/ks";
+                    String filePath = tempFilePath+"www/html/"+fileBO.getProductVersion()+"/ks";
                     fileBO.setFilePath(filePath);
                     File destTempFile = new File(filePath,fileBO.getFileName());
                     // 创建文件
@@ -93,10 +93,11 @@ public class FileManagementServiceImpl implements FileManagementService {
     }
 
     private Boolean createFile(File destTempFile,File parentFileDir,String guid) throws IOException{
+
         // 文件是否已存在
         if (!destTempFile.exists()) {
             //先得到文件的上级目录，并创建上级目录，在创建文件,
-            destTempFile.getParentFile().mkdir();
+            destTempFile.getParentFile().mkdirs();
 
             // 创建文件，但此时没有数据
             destTempFile.createNewFile();

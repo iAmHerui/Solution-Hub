@@ -47,6 +47,6 @@
     </insert>
 
     <delete id="deleteNodeInfo">
-        DELETE FROM node_management WHERE name = #{nodeName,jdbcType=VARCHAR}
+        DELETE FROM node_management WHERE node_name = #{nodeName,jdbcType=VARCHAR}
     </delete>
 </mapper>
