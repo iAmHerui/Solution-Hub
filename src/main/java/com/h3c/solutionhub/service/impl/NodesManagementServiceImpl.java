@@ -79,8 +79,8 @@ public class NodesManagementServiceImpl implements NodesManagementService {
         // 3.生成配置文件dhcpd.conf
         createConfFile(dhcpIPPond,dhcpMask,nodes);
 
-        // TODO 4.创建子目录（/var/www/html/UUID/）执行mount
-//        execLinuxCommand("mount ???");
+        // 4.创建子目录（/var/www/html/UUID/）执行mount
+        execLinuxCommand("mount -t auto /var/iso/E0701/CentOS7.3.iso /var/www/html/E0701");
 
         // 5.生成配置文件 grub.cfg-宿主机IP16进制
         createGrubConfFile(productType,productVersion);

@@ -72,7 +72,7 @@ public class FileManagementServiceImpl implements FileManagementService {
             } else if(suffix.equals("cfg")) {
                 File parentFileDir = new File(tempFilePath+guid);
                 if(parentFileDir.isDirectory()) {
-                    String filePath = tempFilePath+"www/html/"+fileBO.getProductVersion()+"/ks";
+                    String filePath = tempFilePath+"www/html/ks/"+fileBO.getProductVersion();
                     fileBO.setFilePath(filePath);
                     File destTempFile = new File(filePath,fileBO.getFileName());
                     // 创建文件
