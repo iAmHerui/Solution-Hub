@@ -1,7 +1,5 @@
 package com.h3c.solutionhub.service.impl;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
 import com.h3c.solutionhub.common.RestTemplateTool;
 import com.h3c.solutionhub.entity.NodeBo;
 import com.h3c.solutionhub.mapper.FileManagementMapper;
@@ -30,6 +28,18 @@ public class NodesManagementServiceImpl implements NodesManagementService {
     private FileManagementMapper fileManagementMapper;
 
     RestTemplateTool restTemplateTool = new RestTemplateTool();
+
+    @Value("${tempFilePath}")
+    private String tempFilePath;
+
+    @Value("${dhcpFilePath}")
+    private String dhcpFilePath;
+
+    @Value("${grubFilePath}")
+    private String grubFilePath;
+
+    @Value("${mountShell}")
+    private String mountShell;
 
     @Override
     public List<NodeBo> getNodeList() {
@@ -80,7 +90,7 @@ public class NodesManagementServiceImpl implements NodesManagementService {
         createConfFile(dhcpIPPond,dhcpMask,nodes);
 
         // 4.创建子目录（/var/www/html/UUID/）执行mount
-        execLinuxCommand("mount -t auto /var/iso/E0701/CentOS7.3.iso /var/www/html/E0701");
+        execLinuxCommand(mountShell);
 
         // 5.生成配置文件 grub.cfg-宿主机IP16进制
         createGrubConfFile(productType,productVersion);
@@ -113,16 +123,17 @@ public class NodesManagementServiceImpl implements NodesManagementService {
 
         ResponseEntity responseEntity =restTemplateTool.sendHttps(url,null, HttpMethod.GET,token);
 
+
         String responseBody = responseEntity.getBody().toString();
-        JSONObject resultJson = JSON.parseObject(responseBody);
-        return resultJson.getJSONArray("AssociatedNetworkAddresses").get(0).toString();
+        return responseBody.substring(responseBody.indexOf("[")+1,responseBody.lastIndexOf("]"));
     }
 
     private void startPXE(String nodeMangeIP,String token) {
         String url = "https://"+nodeMangeIP+"/redfish/v1/Systems/1";
 
         HashMap<String, Object> map = new HashMap<>();
-
+        map.put("AssetTag","solution_hub");
+        map.put("HostName","solution_hub");
         HashMap<String, Object> childMap = new HashMap<>();
         childMap.put("BootSourceOverrideMode","UEFI");
         childMap.put("BootSourceOverrideTarget","Pxe");
@@ -151,7 +162,7 @@ public class NodesManagementServiceImpl implements NodesManagementService {
             String dhcpIPPond,
             String dhcpMask,
             List<NodeBo> nodeList) {
-        String filePath = "/etc/dhcp/dhcpd.conf";
+        String filePath = dhcpFilePath;
         File file = new File(filePath);
         String confInfo ="";
         if(!file.exists()) {
@@ -185,9 +196,6 @@ public class NodesManagementServiceImpl implements NodesManagementService {
         // iso所在目录 版本号+iso前缀名称
         String prefixName = isoName.substring(0,isoName.lastIndexOf("."));
 
-        // ks-auto.cfg相对路径 版本号+/ks/ks-auto.cfg
-
-
         String fileInfo =
                 "set default=\"0\"\n"+
                         "\n"+
@@ -212,15 +220,14 @@ public class NodesManagementServiceImpl implements NodesManagementService {
                         "menuentry 'Install CAS-x86_64' --class fedora --class gnu-linux --class gnu --class os {\n"+
                         "       linuxefi /images/pxeboot/vmlinuz\n"+
                         "       inst.stage2=http://"+hostIP()+"/"+prefixName+"\n"+
-                        "       inst.ks=http://"+hostIP()+"/"+productVersion+"/ks/ks-auto.cfg"+"\n"+
+                        "       inst.ks=http://"+hostIP()+"/ks/"+productVersion+"/ks/ks-auto.cfg"+"\n"+
                         "       net.ifnames=0\n"+
                         "       biosdevname=0\n"+
                         "       quiet\n"+
                         "       initrdefi /images/pxeboot/initrd.img\n"+
                         "}\n";
 
-        //TODO ip16进制
-        createFile(fileInfo,"/var/lib/tftp/EFI/BOOT/grub.cfg"+"-"+to16(hostIP()));
+        createFile(fileInfo,grubFilePath+"-"+to16(hostIP()));
     }
 
     private void createFile(String fileInfo,String filePath) {
@@ -230,7 +237,7 @@ public class NodesManagementServiceImpl implements NodesManagementService {
                 file.getParentFile().mkdirs();
                 file.createNewFile();
             }
-            OutputStreamWriter fw = new OutputStreamWriter(new FileOutputStream(file),"UTF-8");
+            OutputStreamWriter fw = new OutputStreamWriter(new FileOutputStream(file,true),"UTF-8");
             BufferedWriter bw = new BufferedWriter(fw);
             bw.write(fileInfo);
             bw.flush();

@@ -79,7 +79,14 @@ public class FileManagementServiceImpl implements FileManagementService {
                     createFile(destTempFile,parentFileDir,guid);
                 }
             } else {
-                // TODO 适配其他文件类型
+                File parentFileDir = new File(tempFilePath+guid);
+                if(parentFileDir.isDirectory()) {
+                    String filePath = tempFilePath+"temp/"+fileBO.getProductVersion();
+                    fileBO.setFilePath(filePath);
+                    File destTempFile = new File(filePath,fileBO.getFileName());
+                    // 创建文件
+                    createFile(destTempFile,parentFileDir,guid);
+                }
             }
 
             // 录入数据库

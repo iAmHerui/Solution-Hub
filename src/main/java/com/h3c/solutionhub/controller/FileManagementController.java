@@ -83,7 +83,7 @@ public class FileManagementController {
     @ResponseBody
     public Boolean mergeFile(String guid, FileBO fileBO) {
 //        /** test **/
-//        fileBO.setFileName("CentOS7.3.iso");
+//        fileBO.setFileName("何锐-简历.docx");
 //        fileBO.setProductVersion("E0701");
 //        /** test **/
         return fileManagementService.mergeFile(guid,fileBO);

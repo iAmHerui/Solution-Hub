@@ -1,5 +1,7 @@
 package com.h3c.solutionhub.common;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import org.junit.Test;
 
 import java.io.File;
@@ -50,6 +52,24 @@ public class FileTest {
         System.out.println(destTempFile.getAbsoluteFile());
         System.out.println(destTempFile.getCanonicalFile());
 
+    }
+
+    @Test
+    public void jsonTest() throws Exception {
+        String test = "{@odata.context=/redfish/v1/$metadata#NetworkPort.NetworkPort, " +
+                "@odata.etag=W/\"1626315173\", " +
+                "@odata.id=/redfish/v1/Chassis/1/NetworkAdapters/PCIeSlot1/NetworkPorts/1, " +
+                "@odata.type=#NetworkPort.v1_1_0.NetworkPort, " +
+                "AssociatedNetworkAddresses=[54:2B:DE:0B:F1:BC], " +
+                "Id=1, " +
+                "LinkStatus=N/A, " +
+                "Name=1, " +
+                "Oem={Public={BDF=0000:5E:00.0, PortType=OpticalPort}}, " +
+                "PhysicalPortNumber=1}";
+        String mac = test.substring(test.indexOf("[")+1,test.lastIndexOf("]"));
+        System.out.println(mac);
+//        JSONObject resultJson = JSON.parseObject(test);
+//        System.out.println(resultJson.getJSONArray("AssociatedNetworkAddresses").get(0).toString());
     }
 
 }

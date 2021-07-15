@@ -33,19 +33,19 @@ public class NodesManagementController {
     @ApiOperation(value = "节点添加",notes = "节点添加")
     @PostMapping(value = "/nodeAdd")
     public Boolean nodeAdd(NodeBo nodeBo) {
-        /** test **/
-        nodeBo.setNodeName("cas-node1");
-        nodeBo.setNodeHDMIP("172.17.0.2");
-        nodeBo.setNodeType("CAS");
-        nodeBo.setNodeStatus("空闲");
-        nodeBo.setNodeHDMPaasword("Password@_");
-        nodeBo.setManagementIP("192.168.0.2");
-        nodeBo.setBusinessIP("192.168.1.2");
-        nodeBo.setManagementMask("255.255.255.0");
-        nodeBo.setBusinessMask("255.255.255.0");
-        nodeBo.setManagementGateway("192.168.0.1");
-        nodeBo.setBusinessGateway("192.168.1.1");
-        /** test **/
+//        /** test **/
+//        nodeBo.setNodeName("cas-node1");
+//        nodeBo.setNodeHDMIP("172.17.0.2");
+//        nodeBo.setNodeType("CAS");
+//        nodeBo.setNodeStatus("空闲");
+//        nodeBo.setNodeHDMPaasword("Password@_");
+//        nodeBo.setManagementIP("192.168.0.2");
+//        nodeBo.setBusinessIP("192.168.1.2");
+//        nodeBo.setManagementMask("255.255.255.0");
+//        nodeBo.setBusinessMask("255.255.255.0");
+//        nodeBo.setManagementGateway("192.168.0.1");
+//        nodeBo.setBusinessGateway("192.168.1.1");
+//        /** test **/
         return nodesManagementService.insertNode(nodeBo);
     }
 
@@ -58,9 +58,6 @@ public class NodesManagementController {
     /**
      * 节点部署
      *
-     * @param dhcpIPPond
-     * @param dhcpMask
-     * @param nodes（NodeName、ManagementIP）
      * @return
      */
     @ApiOperation(value = "节点部署",notes = "节点部署")
@@ -71,6 +68,19 @@ public class NodesManagementController {
             String productType,
             String productVersion,
             List<NodeBo> nodes) {
+//        /** test **/
+//        ) {
+//        String dhcpIPPond = "170.0.0.0";
+//        String dhcpMask = "255.255.255.0";
+//        String productType = "CAS";
+//        String productVersion = "E0701";
+//
+//        List<NodeBo> nodes = new ArrayList<>();
+//        NodeBo node = new NodeBo();
+//        node.setManagementIP("170.0.0.36");
+//        node.setNodeName("cas-node1");
+//        nodes.add(node);
+//        /** test **/
         return nodesManagementService.deployNode(dhcpIPPond,dhcpMask,productType,productVersion,nodes);
     }
 

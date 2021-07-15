@@ -1,7 +1,6 @@
 package com.h3c.solutionhub.service;
 
 import com.h3c.solutionhub.entity.NodeBo;
-import com.sun.org.apache.xpath.internal.operations.Bool;
 
 import java.util.List;
 

@@ -29,7 +29,7 @@ public class RestTemplateTool {
         HttpHeaders httpHeaders = new HttpHeaders();
         // 设置contentType
         httpHeaders.setContentType(MediaType.valueOf(MediaType.APPLICATION_JSON_VALUE));
-        if(!token.isEmpty()) {
+        if(token!=null) {
             httpHeaders.set("X-Auth-Token",token);
         }
 
