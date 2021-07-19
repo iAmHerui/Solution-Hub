@@ -1,5 +1,6 @@
 package com.h3c.solutionhub.controller;
 
+import com.h3c.solutionhub.entity.DhcpBO;
 import com.h3c.solutionhub.entity.NodeBo;
 import com.h3c.solutionhub.service.NodesManagementService;
 import io.swagger.annotations.Api;
@@ -63,8 +64,6 @@ public class NodesManagementController {
     @ApiOperation(value = "节点部署",notes = "节点部署")
     @PostMapping(value = "/nodeDeploy")
     public Boolean nodeDeploy(
-            String dhcpIPPond,
-            String dhcpMask,
             String productType,
             String productVersion,
             List<NodeBo> nodes) {
@@ -81,7 +80,18 @@ public class NodesManagementController {
 //        node.setNodeName("cas-node1");
 //        nodes.add(node);
 //        /** test **/
-        return nodesManagementService.deployNode(dhcpIPPond,dhcpMask,productType,productVersion,nodes);
+        return nodesManagementService.deployNode(productType,productVersion,nodes);
+    }
+    
+    @ApiOperation(value = "查看DHCP地址",notes = "查看DHCP地址")
+    @PostMapping(value = "/getDHCPInfo")
+    public DhcpBO getDHCPInfo() {
+        return nodesManagementService.getDHCPInfo();
     }
 
+    @ApiOperation(value = "添加DHCP地址",notes = "添加DHCP地址")
+    @PostMapping(value = "/addDHCPInfo")
+    public Boolean addDHCPInfo(String dhcpIPPond, String dhcpMask) {
+        return nodesManagementService.addDHCPInfo(dhcpIPPond,dhcpMask);
+    }
 }

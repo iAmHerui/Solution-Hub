@@ -1,5 +1,6 @@
 package com.h3c.solutionhub.service;
 
+import com.h3c.solutionhub.entity.DhcpBO;
 import com.h3c.solutionhub.entity.NodeBo;
 
 import java.util.List;
@@ -13,9 +14,11 @@ public interface NodesManagementService {
     Boolean deleteNode(String nodeName);
 
     Boolean deployNode(
-            String dhcpIPPond,
-            String dhcpMask,
             String productType,
             String productVersion,
             List<NodeBo> nodes);
+
+    Boolean addDHCPInfo(String dhcpIPPond, String dhcpMask);
+
+    DhcpBO getDHCPInfo();
 }

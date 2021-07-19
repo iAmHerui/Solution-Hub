@@ -1,5 +1,6 @@
 package com.h3c.solutionhub.mapper;
 
+import com.h3c.solutionhub.entity.DhcpBO;
 import com.h3c.solutionhub.entity.NodeBo;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
@@ -27,4 +28,12 @@ public interface NodesManagementMapper {
                            @Param("businessGateway") String storageGateway);
 
     Boolean deleteNodeInfo(@Param("nodeName") String nodeName);
+
+    Boolean insertDHCPInfo(@Param("dhcpIPPond") String dhcpIPPond,@Param("dhcpMask") String dhcpMask);
+
+    DhcpBO selectDHCPInfo();
+
+    int isDhcpExist();
+
+    Boolean deleteDHCPInfo();
 }

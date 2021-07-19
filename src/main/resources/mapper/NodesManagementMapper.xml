@@ -58,4 +58,31 @@
     <delete id="deleteNodeInfo">
         DELETE FROM node_management WHERE node_name = #{nodeName,jdbcType=VARCHAR}
     </delete>
+
+    <insert id="insertDHCPInfo" >
+         INSERT INTO  dhcp (
+            dhcp_ip,
+            dhcp_mask
+        ) VALUES (
+            #{dhcpIPPond,jdbcType=VARCHAR},
+            #{dhcpMask,jdbcType=VARCHAR}
+        )
+    </insert>
+
+    <select id="selectDHCPInfo" resultType="com.h3c.solutionhub.entity.DhcpBO">
+        SELECT
+            dhcp_ip as dhcpIPPond,
+            dhcp_mask as dhcpMask
+        FROM dhcp
+    </select>
+
+    <select id="isDhcpExist" resultType="int">
+        SELECT COUNT(1)
+        FROM dhcp
+    </select>
+    
+    <delete id="deleteDHCPInfo">
+        DELETE FROM dhcp WHERE 1=1
+    </delete>
+
 </mapper>

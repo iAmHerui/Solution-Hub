@@ -1,6 +1,7 @@
 package com.h3c.solutionhub.service.impl;
 
 import com.h3c.solutionhub.common.RestTemplateTool;
+import com.h3c.solutionhub.entity.DhcpBO;
 import com.h3c.solutionhub.entity.NodeBo;
 import com.h3c.solutionhub.mapper.FileManagementMapper;
 import com.h3c.solutionhub.mapper.NodesManagementMapper;
@@ -73,11 +74,12 @@ public class NodesManagementServiceImpl implements NodesManagementService {
 
     @Override
     public Boolean deployNode(
-            String dhcpIPPond,
-            String dhcpMask,
             String productType,
             String productVersion,
             List<NodeBo> nodes) {
+
+        // 获取当前DHCP地址
+        DhcpBO dhcpBO = nodesManagementMapper.selectDHCPInfo();
 
         for(NodeBo node:nodes) {
             // 1.获取token
@@ -90,7 +92,7 @@ public class NodesManagementServiceImpl implements NodesManagementService {
         }
 
         // 3.生成配置文件dhcpd.conf
-        createConfFile(dhcpIPPond,dhcpMask,nodes);
+        createConfFile(dhcpBO.getDhcpIPPond(),dhcpBO.getDhcpMask(),nodes);
 
         // 4.创建子目录（/var/www/html/UUID/）执行mount
         execLinuxCommand(mountShell);
@@ -106,6 +108,22 @@ public class NodesManagementServiceImpl implements NodesManagementService {
             reboot(node.getManagementIP(),node.getToken());
         }
         return true;
+    }
+
+    @Override
+    public Boolean addDHCPInfo(String dhcpIPPond, String dhcpMask) {
+        if(nodesManagementMapper.isDhcpExist()>0) {
+            nodesManagementMapper.deleteDHCPInfo();
+            nodesManagementMapper.insertDHCPInfo(dhcpIPPond,dhcpMask);
+        } else {
+            nodesManagementMapper.insertDHCPInfo(dhcpIPPond,dhcpMask);
+        }
+        return true;
+    }
+
+    @Override
+    public DhcpBO getDHCPInfo() {
+        return nodesManagementMapper.selectDHCPInfo();
     }
 
 
@@ -144,7 +162,8 @@ public class NodesManagementServiceImpl implements NodesManagementService {
 
         map.put("Boot",childMap);
 
-        restTemplateTool.sendHttps(url,map,HttpMethod.PATCH,token);
+//        restTemplateTool.sendHttps(url,map,HttpMethod.PATCH,token);
+        restTemplateTool.sendHttpsPatch(url,map,token);
 
 
     }
