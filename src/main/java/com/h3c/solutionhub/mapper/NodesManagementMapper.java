@@ -21,7 +21,10 @@ public interface NodesManagementMapper {
                            @Param("managementMask") String managementMask,
                            @Param("businessMask") String businessMask,
                            @Param("managementGateway") String managementGateway,
-                           @Param("businessGateway") String businessGateway);
+                           @Param("businessGateway") String businessGateway,
+                           @Param("storageIP") String storageIP,
+                           @Param("storageMask") String storageMask,
+                           @Param("businessGateway") String storageGateway);
 
     Boolean deleteNodeInfo(@Param("nodeName") String nodeName);
 }

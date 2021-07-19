@@ -14,7 +14,10 @@
             management_mask as managementMask,
             business_mask as businessMask,
             management_gateway as managementGateway,
-            business_gateway as businessGateway
+            business_gateway as businessGateway,
+            storage_ip as storageIP,
+            storage_mask as storageMask,
+            storage_gateway as storageGateway
         FROM node_management
     </select>
 
@@ -30,7 +33,10 @@
             management_mask,
             business_mask,
             management_gateway,
-            business_gateway
+            business_gateway,
+            storage_ip,
+            storage_mask,
+            storage_gateway
         ) VALUES (
             #{nodeName,jdbcType=VARCHAR},
             #{nodeHDMIP,jdbcType=VARCHAR},
@@ -42,7 +48,10 @@
             #{managementMask,jdbcType=VARCHAR},
             #{businessMask,jdbcType=VARCHAR},
             #{managementGateway,jdbcType=VARCHAR},
-            #{businessGateway,jdbcType=VARCHAR}
+            #{businessGateway,jdbcType=VARCHAR},
+            #{storageIP,jdbcType=VARCHAR},
+            #{storageMask,jdbcType=VARCHAR},
+            #{storageGateway,jdbcType=VARCHAR}
         )
     </insert>
 

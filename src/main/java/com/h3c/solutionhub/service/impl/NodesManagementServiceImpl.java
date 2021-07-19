@@ -60,7 +60,10 @@ public class NodesManagementServiceImpl implements NodesManagementService {
                 nodeBo.getManagementMask(),
                 nodeBo.getBusinessMask(),
                 nodeBo.getManagementGateway(),
-                nodeBo.getBusinessGateway());
+                nodeBo.getBusinessGateway(),
+                nodeBo.getStorageIP(),
+                nodeBo.getStorageMask(),
+                nodeBo.getStorageGateway());
     }
 
     @Override
