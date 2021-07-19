@@ -43,4 +43,14 @@ public class NodeBo {
 
     // token
     private String token;
+
+    // 存储管理IP
+    private String storageIP;
+
+    // 存储管理掩码
+    private String storageMask;
+
+    // 存储管理网关
+    private String storageGateway;
+
 }
