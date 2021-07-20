@@ -38,4 +38,9 @@ public class RestTemplateController {
         return "doHttpPost OK!";
     }
 
+    @PatchMapping("/testPatch")
+    public Boolean testPatch() {
+        return true;
+    }
+
 }

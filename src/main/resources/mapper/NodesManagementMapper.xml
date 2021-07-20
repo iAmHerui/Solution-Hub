@@ -85,4 +85,25 @@
         DELETE FROM dhcp WHERE 1=1
     </delete>
 
+    <update id="editNodeInfo" >
+    UPDATE  node_management
+        SET
+            node_name = #{nodeName,jdbcType=VARCHAR},
+            node_hdm_ip = #{nodeHDMIP,jdbcType=VARCHAR},
+            node_type = #{nodeType,jdbcType=VARCHAR},
+            node_status = #{nodeStatus,jdbcType=VARCHAR},
+            node_hdm_password = #{nodeHDMPaasword,jdbcType=VARCHAR},
+            management_ip = #{managementIP,jdbcType=VARCHAR},
+            business_ip = #{businessIP,jdbcType=VARCHAR} ,
+            management_mask = #{managementMask,jdbcType=VARCHAR},
+            business_mask = #{businessMask,jdbcType=VARCHAR} ,
+            management_gateway = #{managementGateway,jdbcType=VARCHAR},
+            business_gateway = #{businessGateway,jdbcType=VARCHAR},
+            storage_ip = #{storageIP,jdbcType=VARCHAR} ,
+            storage_mask = #{storageMask,jdbcType=VARCHAR},
+            storage_gateway = #{storageGateway,jdbcType=VARCHAR}
+        WHERE node_hdm_ip = #{nodeHDMIP,jdbcType=VARCHAR}
+</update>
+
+
 </mapper>

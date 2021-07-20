@@ -11,6 +11,8 @@ public interface NodesManagementService {
 
     Boolean insertNode(NodeBo nodeBo);
 
+    Boolean editNode(NodeBo nodeBo);
+
     Boolean deleteNode(String nodeName);
 
     Boolean deployNode(

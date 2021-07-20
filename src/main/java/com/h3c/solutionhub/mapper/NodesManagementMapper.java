@@ -36,4 +36,20 @@ public interface NodesManagementMapper {
     int isDhcpExist();
 
     Boolean deleteDHCPInfo();
+
+    Boolean editNodeInfo(@Param("nodeName") String nodeName,
+                         @Param("nodeHDMIP") String nodeHDMIP,
+                         @Param("nodeType") String nodeType,
+                         @Param("nodeStatus") String nodeStatus,
+                         @Param("nodeHDMPaasword") String nodeHDMPaasword,
+                         @Param("managementIP") String managementIP,
+                         @Param("businessIP") String businessIP,
+                         @Param("managementMask") String managementMask,
+                         @Param("businessMask") String businessMask,
+                         @Param("managementGateway") String managementGateway,
+                         @Param("businessGateway") String businessGateway,
+                         @Param("storageIP") String storageIP,
+                         @Param("storageMask") String storageMask,
+                         @Param("storageGateway") String storageGateway);
+
 }

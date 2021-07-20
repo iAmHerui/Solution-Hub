@@ -14,12 +14,6 @@ import java.util.Map;
 
 public class RestTemplateTool {
 
-//    url "https://170.0.0.36/redfish/v1/SessionService/Sessions"
-//    HashMap<String, Object> map = new HashMap<>();
-//        map.put("UserName","admin");
-//        map.put("Password","Password@_");
-//    System.err.println(response.getStatusCodeValue()); 响应码,如:401、302、404、500、200等
-//    String token = response.getHeaders().get("X-Auth-Token").get(0);
     public ResponseEntity sendHttps(String url,Map map,HttpMethod httpMethod,String token) {
         // 获取Rest客户端实例
         RestTemplate restTemplate = new RestTemplate(new HttpsClientRequestFactory());
@@ -48,7 +42,7 @@ public class RestTemplateTool {
         return response;
     }
 
-    // TODO RestTemplate发送PATCH请求
+    // RestTemplate发送HTTP PATCH请求
     public ResponseEntity sendHttpsPatch(String url,Map map,String token) {
 
         StringBuffer forwardURL = new StringBuffer();
@@ -74,5 +68,7 @@ public class RestTemplateTool {
 
         return responseEntity;
     }
+
+    // TODO RestTemplate发送HTTPs PATCH请求
 
 }

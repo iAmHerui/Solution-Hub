@@ -68,6 +68,25 @@ public class NodesManagementServiceImpl implements NodesManagementService {
     }
 
     @Override
+    public Boolean editNode(NodeBo nodeBo) {
+        return nodesManagementMapper.editNodeInfo(
+                nodeBo.getNodeName(),
+                nodeBo.getNodeHDMIP(),
+                nodeBo.getNodeType(),
+                nodeBo.getNodeStatus(),
+                nodeBo.getNodeHDMPaasword(),
+                nodeBo.getManagementIP(),
+                nodeBo.getBusinessIP(),
+                nodeBo.getManagementMask(),
+                nodeBo.getBusinessMask(),
+                nodeBo.getManagementGateway(),
+                nodeBo.getBusinessGateway(),
+                nodeBo.getStorageIP(),
+                nodeBo.getStorageMask(),
+                nodeBo.getStorageGateway());
+    }
+
+    @Override
     public Boolean deleteNode(String nodeName) {
         return nodesManagementMapper.deleteNodeInfo(nodeName);
     }

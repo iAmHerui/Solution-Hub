@@ -52,6 +52,14 @@ public class NodesManagementController {
         return nodesManagementService.insertNode(nodeBo);
     }
 
+    @ApiOperation(value = "节点编辑",notes = "节点编辑")
+    @CrossOrigin(origins ="*",maxAge =3600)
+    @PutMapping(value = "/nodeEdit")
+    public Boolean nodeEdit(NodeBo nodeBo) {
+        return nodesManagementService.editNode(nodeBo);
+    }
+
+
     @ApiOperation(value = "节点删除",notes = "节点删除")
     @CrossOrigin(origins ="*",maxAge =3600)
     @PostMapping(value = "/nodeDelete")

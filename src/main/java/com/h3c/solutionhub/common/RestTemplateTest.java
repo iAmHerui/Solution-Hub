@@ -7,8 +7,11 @@ import com.google.gson.Gson;
 import com.h3c.solutionhub.config.HttpsClientRequestFactory;
 import org.junit.Test;
 import org.springframework.http.*;
+import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.StringHttpMessageConverter;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
 import java.io.UnsupportedEncodingException;
@@ -285,5 +288,22 @@ public class RestTemplateTest {
         System.out.println(resultJson.get("AssociatedNetworkAddresses"));
         System.out.println(resultJson.getJSONArray("AssociatedNetworkAddresses").get(0));
         System.out.println(resultJson.get("Id"));
+    }
+
+    @Test
+    public void testPatch() {
+        StringBuffer forwardURL = new StringBuffer();
+        forwardURL.append("http://localhost:8080/restTemplate/testPatch");
+
+        //创建 restTemplate 对象
+        RestTemplate restTemplatePatch = new RestTemplate(new HttpComponentsClientHttpRequestFactory());
+
+        //封装请求头
+        MultiValueMap<String,String> headers = new LinkedMultiValueMap<String,String>();
+        //封装请求内容
+        HttpEntity<Map<String, Object>> requestEntity = new HttpEntity(null,headers);
+        ResponseEntity responseEntity = restTemplatePatch.exchange(forwardURL.toString(), HttpMethod.PATCH, requestEntity, Object.class);
+        System.out.println("OK");
+
     }
 }
