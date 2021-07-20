@@ -40,6 +40,7 @@ public class RestTemplateController {
 
     @PatchMapping("/testPatch")
     public Boolean testPatch() {
+        System.out.println("yeah!");
         return true;
     }
 

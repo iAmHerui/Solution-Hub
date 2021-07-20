@@ -1,5 +1,6 @@
 package com.h3c.solutionhub.service.impl;
 
+import com.h3c.solutionhub.common.HttpClientUtil;
 import com.h3c.solutionhub.common.RestTemplateTool;
 import com.h3c.solutionhub.entity.DhcpBO;
 import com.h3c.solutionhub.entity.NodeBo;
@@ -113,8 +114,8 @@ public class NodesManagementServiceImpl implements NodesManagementService {
         // 3.生成配置文件dhcpd.conf
         createConfFile(dhcpBO.getDhcpIPPond(),dhcpBO.getDhcpMask(),nodes);
 
-//        // 4.创建子目录（/var/www/html/UUID/）执行mount
-//        execLinuxCommand(mountShell);
+        // 4.创建子目录（/var/www/html/UUID/）执行mount
+        execLinuxCommand(mountShell);
 
         // 5.生成配置文件 grub.cfg-宿主机IP16进制
         createGrubConfFile(productType,productVersion);
@@ -181,10 +182,7 @@ public class NodesManagementServiceImpl implements NodesManagementService {
 
         map.put("Boot",childMap);
 
-//        restTemplateTool.sendHttps(url,map,HttpMethod.PATCH,token);
-        restTemplateTool.sendHttpsPatch(url,map,token);
-
-
+        new HttpClientUtil().doPatch(url,map,token);
     }
 
     private void reboot(String nodeMangeIP,String token) {
