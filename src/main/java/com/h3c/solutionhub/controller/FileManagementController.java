@@ -45,6 +45,7 @@ public class FileManagementController {
      * @param file
      * @param chunks
      */
+    @CrossOrigin(origins ="*",maxAge =3600)
     @RequestMapping("/upload")
     public void bigFile(HttpServletRequest request,
                         HttpServletResponse response,
@@ -79,6 +80,7 @@ public class FileManagementController {
      * @throws Exception
      */
     @ApiOperation(value = "文件合并",notes = "文件合并")
+    @CrossOrigin(origins ="*",maxAge =3600)
     @RequestMapping("/merge")
     @ResponseBody
     public Boolean mergeFile(String guid, FileBO fileBO) {
@@ -90,6 +92,7 @@ public class FileManagementController {
     }
 
     @ApiOperation(value = "文件删除",notes = "文件删除")
+    @CrossOrigin(origins ="*",maxAge =3600)
     @PostMapping(value = "/fileDelete")
     public Boolean fileDelete(String fileName) {
         return fileManagementService.deleteFileInfo(fileName);

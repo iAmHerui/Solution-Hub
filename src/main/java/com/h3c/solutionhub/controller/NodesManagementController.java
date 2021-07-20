@@ -33,6 +33,7 @@ public class NodesManagementController {
      * @return
      */
     @ApiOperation(value = "节点添加",notes = "节点添加")
+    @CrossOrigin(origins ="*",maxAge =3600)
     @PostMapping(value = "/nodeAdd")
     public Boolean nodeAdd(NodeBo nodeBo) {
 //        /** test **/
@@ -52,6 +53,7 @@ public class NodesManagementController {
     }
 
     @ApiOperation(value = "节点删除",notes = "节点删除")
+    @CrossOrigin(origins ="*",maxAge =3600)
     @PostMapping(value = "/nodeDelete")
     public Boolean nodeDelete(String nodeName) {
         return nodesManagementService.deleteNode(nodeName);
@@ -63,6 +65,7 @@ public class NodesManagementController {
      * @return
      */
     @ApiOperation(value = "节点部署",notes = "节点部署")
+    @CrossOrigin(origins ="*",maxAge =3600)
     @PostMapping(value = "/nodeDeploy")
     public Boolean nodeDeploy(
 //            String productType,
@@ -83,12 +86,14 @@ public class NodesManagementController {
     }
     
     @ApiOperation(value = "查看DHCP地址",notes = "查看DHCP地址")
+    @CrossOrigin(origins ="*",maxAge =3600)
     @GetMapping(value = "/getDHCPInfo")
     public DhcpBO getDHCPInfo() {
         return nodesManagementService.getDHCPInfo();
     }
 
     @ApiOperation(value = "添加DHCP地址",notes = "添加DHCP地址")
+    @CrossOrigin(origins ="*",maxAge =3600)
     @PostMapping(value = "/addDHCPInfo")
     public Boolean addDHCPInfo(String dhcpIPPond, String dhcpMask) {
         return nodesManagementService.addDHCPInfo(dhcpIPPond,dhcpMask);
