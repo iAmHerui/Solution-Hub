@@ -8,6 +8,7 @@ import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Api(value = "节点管理",tags = "节点管理")
@@ -64,27 +65,25 @@ public class NodesManagementController {
     @ApiOperation(value = "节点部署",notes = "节点部署")
     @PostMapping(value = "/nodeDeploy")
     public Boolean nodeDeploy(
-            String productType,
-            String productVersion,
-            List<NodeBo> nodes) {
-//        /** test **/
-//        ) {
-//        String dhcpIPPond = "170.0.0.0";
-//        String dhcpMask = "255.255.255.0";
-//        String productType = "CAS";
-//        String productVersion = "E0701";
-//
-//        List<NodeBo> nodes = new ArrayList<>();
-//        NodeBo node = new NodeBo();
-//        node.setManagementIP("170.0.0.36");
-//        node.setNodeName("cas-node1");
-//        nodes.add(node);
-//        /** test **/
+//            String productType,
+//            String productVersion,
+//            List<NodeBo> nodes) {
+        /** test **/
+        ) {
+        String productType = "CAS";
+        String productVersion = "E0701";
+
+        List<NodeBo> nodes = new ArrayList<>();
+        NodeBo node = new NodeBo();
+        node.setManagementIP("170.0.0.36");
+        node.setNodeName("cas-node1");
+        nodes.add(node);
+        /** test **/
         return nodesManagementService.deployNode(productType,productVersion,nodes);
     }
     
     @ApiOperation(value = "查看DHCP地址",notes = "查看DHCP地址")
-    @PostMapping(value = "/getDHCPInfo")
+    @GetMapping(value = "/getDHCPInfo")
     public DhcpBO getDHCPInfo() {
         return nodesManagementService.getDHCPInfo();
     }
