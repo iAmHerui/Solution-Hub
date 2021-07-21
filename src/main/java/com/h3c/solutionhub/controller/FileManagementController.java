@@ -25,8 +25,6 @@ import java.util.List;
 @RequestMapping(value = "/fileManagement")
 public class FileManagementController {
 
-    private static final Logger log = LoggerFactory.getLogger(FileManagementController.class);
-
     @Autowired
     UploadFileService uploadFileService;
 

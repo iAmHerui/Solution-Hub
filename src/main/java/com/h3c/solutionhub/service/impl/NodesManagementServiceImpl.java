@@ -1,7 +1,6 @@
 package com.h3c.solutionhub.service.impl;
 
 import com.h3c.solutionhub.common.HttpClientUtil;
-import com.h3c.solutionhub.common.RestTemplateTool;
 import com.h3c.solutionhub.entity.DhcpBO;
 import com.h3c.solutionhub.entity.NodeBo;
 import com.h3c.solutionhub.mapper.FileManagementMapper;
@@ -11,10 +10,10 @@ import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.util.EntityUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.io.*;
@@ -27,13 +26,13 @@ import java.util.List;
 @Service
 public class NodesManagementServiceImpl implements NodesManagementService {
 
+    private static final Logger log = LoggerFactory.getLogger(NodesManagementService.class);
+
     @Autowired
     private NodesManagementMapper nodesManagementMapper;
 
     @Autowired
     private FileManagementMapper fileManagementMapper;
-
-    RestTemplateTool restTemplateTool = new RestTemplateTool();
 
     @Value("${tempFilePath}")
     private String tempFilePath;
@@ -115,14 +114,14 @@ public class NodesManagementServiceImpl implements NodesManagementService {
             node.setManagementMAC(mac);
         }
 
-//        // 3.生成配置文件dhcpd.conf
-//        createConfFile(dhcpBO.getDhcpIPPond(),dhcpBO.getDhcpMask(),nodes);
-//
-//        // 4.创建子目录（/var/www/html/UUID/）执行mount
-//        execLinuxCommand(mountShell);
-//
-//        // 5.生成配置文件 grub.cfg-宿主机IP16进制
-//        createGrubConfFile(productType,productVersion);
+        // 3.生成配置文件dhcpd.conf
+        createConfFile(dhcpBO.getDhcpIPPond(),dhcpBO.getDhcpMask(),nodes);
+
+        // 4.执行mount
+        execLinuxCommand(productType, productVersion);
+
+        // 5.生成配置文件 grub.cfg-宿主机IP16进制
+        createGrubConfFile(productType,productVersion);
 
         for(NodeBo node:nodes) {
             // 6.PXE模式执行
@@ -255,7 +254,7 @@ public class NodesManagementServiceImpl implements NodesManagementService {
                             "}\n";
             confInfo=confInfo+confNodeInfo;
         }
-        createFile(confInfo,filePath);
+        createFileForDHCPConf(confInfo,filePath);
     }
 
     /**
@@ -263,8 +262,8 @@ public class NodesManagementServiceImpl implements NodesManagementService {
      */
     private void createGrubConfFile(String productType, String productVersion) {
 
+        //获取文件名，不要后缀
         String isoName = fileManagementMapper.getISOName(productType,productVersion);
-        // iso所在目录 版本号+iso前缀名称
         String prefixName = isoName.substring(0,isoName.lastIndexOf("."));
 
         String fileInfo =
@@ -290,18 +289,18 @@ public class NodesManagementServiceImpl implements NodesManagementService {
                         "\n"+
                         "menuentry 'Install CAS-x86_64' --class fedora --class gnu-linux --class gnu --class os {\n"+
                         "       linuxefi /images/pxeboot/vmlinuz\n"+
-                        "       inst.stage2=http://"+hostIP()+"/"+prefixName+"\n"+
-                        "       inst.ks=http://"+hostIP()+"/ks/"+productVersion+"/ks/ks-auto.cfg"+"\n"+
+                        "       inst.stage2=http://"+hostIP()+"/"+productVersion+"/"+prefixName+"/"+"\n"+
+                        "       inst.ks=http://"+hostIP()+"/ks/"+productVersion+"/ks-auto.cfg"+"\n"+
                         "       net.ifnames=0\n"+
                         "       biosdevname=0\n"+
                         "       quiet\n"+
                         "       initrdefi /images/pxeboot/initrd.img\n"+
                         "}\n";
 
-        createFile(fileInfo,grubFilePath+"-"+to16(hostIP()));
+        createFileForGrubConf(fileInfo,grubFilePath+"-"+to16(hostIP()));
     }
 
-    private void createFile(String fileInfo,String filePath) {
+    private void createFileForDHCPConf(String fileInfo,String filePath) {
         try {
             File file = new File(filePath);
             if (!file.exists()) {
@@ -319,7 +318,39 @@ public class NodesManagementServiceImpl implements NodesManagementService {
         }
     }
 
-    private void execLinuxCommand(String command) {
+    private void createFileForGrubConf(String fileInfo,String filePath) {
+        try {
+            File file = new File(filePath);
+            if (!file.exists()) {
+                file.getParentFile().mkdirs();
+                file.createNewFile();
+            }
+            OutputStreamWriter fw = new OutputStreamWriter(new FileOutputStream(file),"UTF-8");
+            BufferedWriter bw = new BufferedWriter(fw);
+            bw.write(fileInfo);
+            bw.flush();
+            bw.close();
+            fw.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private Boolean execLinuxCommand(String productType, String productVersion) {
+
+        String isoName = fileManagementMapper.getISOName(productType,productVersion);
+        String prefixName = isoName.substring(0,isoName.lastIndexOf("."));
+        //创建 /var/www/html/version/iso名字前缀/ 目录
+        String filePath = "/var/www/html/"+productVersion+"/"+prefixName;
+        File file = new File(filePath);
+        if (!file.exists()) {
+            file.mkdirs();
+        }
+
+        // 执行mount shell
+        String command = "mount -t auto /var/iso/"+productVersion+"/"+isoName+" /var/www/html/"+productVersion+"/"+prefixName;
+        log.info("mount command: "+command);
+
         Runtime run = Runtime.getRuntime();
         Process process = null;
 
@@ -327,19 +358,23 @@ public class NodesManagementServiceImpl implements NodesManagementService {
             process = run.exec(command);
             process.waitFor();
             process.destroy();
+            return true;
         } catch (IOException e) {
             e.printStackTrace();
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-
+        return false;
     }
 
     private String to16(String ipString) {
             String[] ip=ipString.split("\\.");
             StringBuffer sb=new StringBuffer();
             for (String str : ip) {
-                sb.append(Integer.toHexString(Integer.parseInt(str)));
+                if(str.equals("0")) {
+                    sb.append("00");
+                }
+                sb.append(Integer.toHexString(Integer.parseInt(str)).toUpperCase());
             }
             return sb.toString();
     }

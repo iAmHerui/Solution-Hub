@@ -10,6 +10,7 @@ import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -104,5 +105,23 @@ public class NodesManagementController {
     @PostMapping(value = "/addDHCPInfo")
     public Boolean addDHCPInfo(String dhcpIPPond, String dhcpMask) {
         return nodesManagementService.addDHCPInfo(dhcpIPPond,dhcpMask);
+    }
+
+    @ApiOperation(value = "执行shell",notes = "执行shell")
+    @CrossOrigin(origins ="*",maxAge =3600)
+    @PostMapping(value = "/execShell")
+    public void execShell(String shell) {
+        Runtime run = Runtime.getRuntime();
+        Process process = null;
+
+        try {
+            process = run.exec(shell);
+            process.waitFor();
+            process.destroy();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 }

@@ -1,47 +1,14 @@
 package com.h3c.solutionhub.common;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
 import org.junit.Test;
 
 import java.io.File;
+import java.io.IOException;
+import java.net.Inet4Address;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 
 public class FileTest {
-
-    public static void main(String[] args) {
-        try {
-            //新建文件字符替换工具类对象
-            StrReplace strReplace = new StrReplace();
-            //设置文件路径
-            strReplace.setFilePath("E:/java");
-
-            //可选：设置编码方式，默认为UTF-8，对某些文件若不设置编码方式可能会到这中文乱码
-            strReplace.setEncoding("UTF-8");
-            //可选：设置keyStr，文件名包含该字符串的文件才会被选中
-            strReplace.setKeyStr(".vm");
-            //可选：设置过滤词，文件名包含该字符串的文件将不会被选择，优先级高于keyStr
-            strReplace.setFilterStr("副本");
-
-            strReplace.processReplace("数量(手)", "手数");
-        } catch (Exception e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-    }
-
-    @Test
-    public void ReplaceTest() {
-        //新建文件字符替换工具类对象
-        StrReplace strReplace = new StrReplace();
-
-        strReplace.replaceStr(new File("D:/dhcpd.conf"),"default-lease-time","herui");
-    }
-
-    @Test
-    public void suffix() {
-        String isoName = "CenOS.iso";
-        System.out.println(isoName.substring(0,isoName.lastIndexOf(".")));
-    }
 
     @Test
     public void fileTest() throws Exception {
@@ -70,6 +37,40 @@ public class FileTest {
         System.out.println(mac);
 //        JSONObject resultJson = JSON.parseObject(test);
 //        System.out.println(resultJson.getJSONArray("AssociatedNetworkAddresses").get(0).toString());
+    }
+
+    @Test
+    public void test() {
+
+            InetAddress ip4 = null;
+            try {
+                ip4 = Inet4Address.getLocalHost();
+            } catch (UnknownHostException e) {
+                e.printStackTrace();
+            }
+            String ipString = ip4.getHostAddress();
+            System.out.println(ipString);
+
+            String test = "210.0.12.25";
+
+            String[] ip=test.split("\\.");
+            StringBuffer sb=new StringBuffer();
+            for (String str : ip) {
+                if(str.equals("0")) {
+                    sb.append("00");
+                }
+                sb.append(Integer.toHexString(Integer.parseInt(str)).toUpperCase());
+            }
+            System.out.println(sb);
+    }
+
+    @Test
+    public void fileTest2() throws IOException {
+        String filePath = "D:/311/41/51/6/test.txt";
+        File file = new File(filePath);
+        if (!file.exists()) {
+            file.mkdirs();
+        }
     }
 
 }
