@@ -1,61 +1,93 @@
 package com.h3c.solutionhub.common;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-
-import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPatch;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.protocol.HTTP;
 import org.apache.http.util.EntityUtils;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 /*
  * 利用HttpClient进行请求的工具类
  */
 public class HttpClientUtil {
-    public String doPost(String url, Map<String, String> map, String charset) {
+
+    public HttpResponse sendHttpsGet(String url, Map map,String token) {
         HttpClient httpClient = null;
-        HttpPost httpPost = null;
-        String result = null;
+        HttpGet httpGet = null;
+        HttpResponse response = null;
         try {
             httpClient = new SSLClient();
-            httpPost = new HttpPost(url);
-            //设置参数
-            List<NameValuePair> list = new ArrayList<NameValuePair>();
-            Iterator iterator = map.entrySet().iterator();
-            while (iterator.hasNext()) {
-                Entry<String, String> elem = (Entry<String, String>) iterator.next();
-                list.add(new BasicNameValuePair(elem.getKey(), elem.getValue()));
+            httpGet = new HttpGet(url);
+            httpGet.setHeader("Content-Type","application/json");
+            if(token!=null) {
+                httpGet.setHeader("X-Auth-Token",token);
             }
-            if (list.size() > 0) {
-                UrlEncodedFormEntity entity = new UrlEncodedFormEntity(list, charset);
-                httpPost.setEntity(entity);
-            }
-            HttpResponse response = httpClient.execute(httpPost);
-            if (response != null) {
-                HttpEntity resEntity = response.getEntity();
-                if (resEntity != null) {
-                    result = EntityUtils.toString(resEntity, charset);
-                }
-            }
+            response = httpClient.execute(httpGet);
+            HttpEntity httpEntity = response.getEntity();
+
+            System.out.println("响应状态为:" + response.getStatusLine());
+//            System.out.println("响应内容为:" + EntityUtils.toString(httpEntity));
+            String string = EntityUtils.toString(httpEntity);
+            System.out.println("MAC:"+string.substring(string.indexOf("[\"")+2,string.lastIndexOf("\"]")));
         } catch (Exception ex) {
             ex.printStackTrace();
         }
-        return result;
+
+        return response;
     }
 
-    public HttpResponse doPatch(String url, Map map,String token) {
+    public HttpResponse sendHttpsPost(String url, Map map,String token) {
+        HttpClient httpClient = null;
+        HttpPost httpPost = null;
+        HttpResponse response = null;
+        try {
+            httpClient = new SSLClient();
+            httpPost = new HttpPost(url);
+            httpPost.setHeader("Content-Type","application/json");
+            if(token!=null) {
+                httpPost.setHeader("X-Auth-Token",token);
+            }
+
+            ObjectMapper mapper = new ObjectMapper();
+            String writeValueAsString = mapper.writeValueAsString(map);
+            JSONObject jsonParam = JSONObject.parseObject(writeValueAsString);
+
+            StringEntity entity = new StringEntity(jsonParam.toString(), HTTP.UTF_8);
+            httpPost.setEntity(entity);
+
+            response = httpClient.execute(httpPost);
+//            Header[] headers = response.getAllHeaders();
+//            System.out.println("响应状态为:" + response.getStatusLine());
+//            for(Header header:headers) {
+//                if(header.getName().equals("X-Auth-Token")) {
+//                    System.out.println(header);
+//                    System.out.println(header.getValue());
+//                }
+//            }
+
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+        return response;
+    }
+
+    public HttpResponse sendHttpsPatch(String url, Map map,String token) {
         HttpClient httpClient = null;
         HttpPatch httpPatch = null;
         HttpResponse response = null;

@@ -9,8 +9,11 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.protocol.HTTP;
 import org.apache.http.util.EntityUtils;
 import org.junit.Test;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
 
 import java.io.IOException;
+import java.net.URI;
 import java.util.HashMap;
 
 public class HttpClientTest {
@@ -50,6 +53,29 @@ public class HttpClientTest {
 
         map.put("Boot",childMap);
 
-        httpClientUtil.doPatch(url,map,"W3zFhEa8vtbvR/RBJDM2hb25ZD/2r3PEVARueoMV5Mk=");
+        httpClientUtil.sendHttpsPatch(url,map,"W3zFhEa8vtbvR/RBJDM2hb25ZD/2r3PEVARueoMV5Mk=");
+    }
+
+    @Test
+    public void HttpsPost() {
+        HttpClientUtil httpClientUtil = new HttpClientUtil();
+
+        String url = "https://210.0.12.23/redfish/v1/SessionService/Sessions";
+
+        HashMap<String, Object> map = new HashMap<>();
+        map.put("UserName","admin");
+        map.put("Password","Password@_");
+
+        httpClientUtil.sendHttpsPost(url,map,"");
+    }
+
+    @Test
+    public void HttpsGet() {
+        HttpClientUtil httpClientUtil = new HttpClientUtil();
+
+        String url = "https://210.0.12.23/redfish/v1/Chassis/1/NetworkAdapters/PCIeSlot1/NetworkPorts/1";
+
+
+        httpClientUtil.sendHttpsGet(url,null,"Og0utARSm4sslfLK6pXaDlPC7qJnrULjjIh+gzqs4m8=");
     }
 }

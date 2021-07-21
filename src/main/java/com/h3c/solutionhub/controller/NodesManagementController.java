@@ -1,6 +1,5 @@
 package com.h3c.solutionhub.controller;
 
-import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.h3c.solutionhub.entity.DhcpBO;
@@ -12,7 +11,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -72,15 +70,11 @@ public class NodesManagementController {
         return nodesManagementService.deleteNode(nodeName);
     }
 
-    /**
-     * 节点部署
-     *
-     * @return
-     */
     @ApiOperation(value = "节点部署",notes = "节点部署")
     @CrossOrigin(origins ="*",maxAge =3600)
     @PostMapping(value = "/nodeDeploy")
     public Boolean nodeDeploy(@RequestBody Map<String,Object> params) {
+
         String productType = params.get("productType").toString();
         String productVersion = params.get("productVersion").toString();
         String nodeListString = params.get("nodes").toString();
@@ -94,9 +88,7 @@ public class NodesManagementController {
             node.setNodeName(nodeBo.getString("nodeName"));
             nodes.add(node);
         }
-
         return nodesManagementService.deployNode(productType,productVersion,nodes);
-
     }
     
     @ApiOperation(value = "查看DHCP地址",notes = "查看DHCP地址")

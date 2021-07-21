@@ -7,6 +7,10 @@ import com.h3c.solutionhub.entity.NodeBo;
 import com.h3c.solutionhub.mapper.FileManagementMapper;
 import com.h3c.solutionhub.mapper.NodesManagementMapper;
 import com.h3c.solutionhub.service.NodesManagementService;
+import org.apache.http.Header;
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.util.EntityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpMethod;
@@ -103,7 +107,7 @@ public class NodesManagementServiceImpl implements NodesManagementService {
 
         for(NodeBo node:nodes) {
             // 1.获取token
-            String token = getToken(node.getManagementIP());
+            String token = getToken(node.getNodeHDMIP());
             node.setToken(token);
 
             // 2.获取管理节点mac
@@ -147,26 +151,47 @@ public class NodesManagementServiceImpl implements NodesManagementService {
     }
 
 
-    private String getToken(String nodeMangeIP) {
-        String url = "https://"+nodeMangeIP+"/redfish/v1/SessionService/Sessions";
+    private String getToken(String nodeHDMIP) {
+        String url = "https://"+nodeHDMIP+"/redfish/v1/SessionService/Sessions";
 
         HashMap<String, Object> map = new HashMap<>();
         map.put("UserName","admin");
         map.put("Password","Password@_");
 
-        ResponseEntity responseEntity =restTemplateTool.sendHttps(url,map, HttpMethod.POST,null);
+//        ResponseEntity responseEntity =restTemplateTool.sendHttps(url,map, HttpMethod.POST,null);
+        HttpResponse response = new HttpClientUtil().sendHttpsPost(url,map,"");
+        Header[] headers = response.getAllHeaders();
+        System.out.println("响应状态为:" + response.getStatusLine());
+        for(Header header:headers) {
+            if(header.getName().equals("X-Auth-Token")) {
+                System.out.println(header);
+                return header.getValue();
 
-        return responseEntity.getHeaders().get("X-Auth-Token").get(0);
+            }
+        }
+        System.out.println("为获取到token");
+        return null;
     }
 
     private String getManageNodeMac(String nodeMangeIP,String token) {
         String url = "https://"+nodeMangeIP+"/redfish/v1/Chassis/1/NetworkAdapters/PCIeSlot1/NetworkPorts/1";
 
-        ResponseEntity responseEntity =restTemplateTool.sendHttps(url,null, HttpMethod.GET,token);
+//        ResponseEntity responseEntity =restTemplateTool.sendHttps(url,null, HttpMethod.GET,token);
+        HttpResponse response = new HttpClientUtil().sendHttpsGet(url,null,token);
 
+        HttpEntity httpEntity = response.getEntity();
 
-        String responseBody = responseEntity.getBody().toString();
-        return responseBody.substring(responseBody.indexOf("[")+1,responseBody.lastIndexOf("]"));
+        System.out.println("响应状态为:" + response.getStatusLine());
+        String string = null;
+        try {
+            string = EntityUtils.toString(httpEntity);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        String mac = string.substring(string.indexOf("[\"")+2,string.lastIndexOf("\"]"));
+        System.out.println("MAC:"+mac);
+
+        return mac;
     }
 
     private void startPXE(String nodeMangeIP,String token) {
@@ -182,7 +207,7 @@ public class NodesManagementServiceImpl implements NodesManagementService {
 
         map.put("Boot",childMap);
 
-        new HttpClientUtil().doPatch(url,map,token);
+        new HttpClientUtil().sendHttpsPatch(url,map,token);
     }
 
     private void reboot(String nodeMangeIP,String token) {
@@ -191,7 +216,10 @@ public class NodesManagementServiceImpl implements NodesManagementService {
         HashMap<String, Object> map = new HashMap<>();
         map.put("ResetType","ForceRestart");
 
-        restTemplateTool.sendHttps(url,map,HttpMethod.PATCH,token);
+        HttpResponse response = new HttpClientUtil().sendHttpsPost(url,map,token);
+        System.out.println("reboot 响应状态为:" + response.getStatusLine());
+
+//        restTemplateTool.sendHttps(url,map,HttpMethod.PATCH,token);
     }
 
     /**
