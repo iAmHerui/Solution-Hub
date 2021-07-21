@@ -128,6 +128,9 @@ public class NodesManagementServiceImpl implements NodesManagementService {
             // 6.PXE模式执行
             startPXE(node.getNodeHDMIP(),node.getToken());
 
+            // 修改节点状态
+
+
             // 7.重启
             reboot(node.getNodeHDMIP(),node.getToken());
         }
@@ -198,8 +201,8 @@ public class NodesManagementServiceImpl implements NodesManagementService {
         String url = "https://"+nodeMangeIP+"/redfish/v1/Systems/1";
 
         HashMap<String, Object> map = new HashMap<>();
-        map.put("AssetTag","solution_hub");
-        map.put("HostName","solution_hub");
+        map.put("AssetTag","solutionhub");
+        map.put("HostName","solutionhub");
         HashMap<String, Object> childMap = new HashMap<>();
         childMap.put("BootSourceOverrideMode","UEFI");
         childMap.put("BootSourceOverrideTarget","Pxe");
@@ -207,7 +210,7 @@ public class NodesManagementServiceImpl implements NodesManagementService {
 
         map.put("Boot",childMap);
 
-        HttpResponse response = new HttpClientUtil().sendHttpsPatch(url,map,token);
+        HttpResponse response = new HttpClientUtil().sendHttpsPatch2(url,map,token);
         System.out.println("reboot 响应状态为:" + response.getStatusLine());
     }
 

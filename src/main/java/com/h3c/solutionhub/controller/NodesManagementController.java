@@ -43,7 +43,7 @@ public class NodesManagementController {
 //        nodeBo.setNodeName("cas-node1");
 //        nodeBo.setNodeHDMIP("172.17.0.2");
 //        nodeBo.setNodeType("CAS");
-//        nodeBo.setNodeStatus("空闲");
+        nodeBo.setNodeStatus("空闲");
 //        nodeBo.setNodeHDMPaasword("Password@_");
 //        nodeBo.setManagementIP("192.168.0.2");
 //        nodeBo.setBusinessIP("192.168.1.2");

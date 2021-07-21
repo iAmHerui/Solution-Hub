@@ -44,8 +44,8 @@ public class HttpClientTest {
         String url = "https://210.0.12.23/redfish/v1/Systems/1";
 
         HashMap<String, Object> map = new HashMap<>();
-        map.put("AssetTag","solution_hub");
-        map.put("HostName","solution_hub");
+        map.put("AssetTag","solutionhub");
+        map.put("HostName","solutionhub");
         HashMap<String, Object> childMap = new HashMap<>();
         childMap.put("BootSourceOverrideMode","UEFI");
         childMap.put("BootSourceOverrideTarget","Pxe");
@@ -53,7 +53,7 @@ public class HttpClientTest {
 
         map.put("Boot",childMap);
 
-        httpClientUtil.sendHttpsPatch(url,map,"Lnee7pxOb6YF/UdDzcraI46XgocPeb8+JzRs8XTadq0=");
+        httpClientUtil.sendHttpsPatch2(url,map,"Lnee7pxOb6YF/UdDzcraI46XgocPeb8+JzRs8XTadq0=");
     }
 
     @Test

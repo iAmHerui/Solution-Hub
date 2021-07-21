@@ -1,5 +1,6 @@
 package com.h3c.solutionhub.common;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.http.Header;
@@ -103,6 +104,33 @@ public class HttpClientUtil {
             JSONObject jsonParam = JSONObject.parseObject(writeValueAsString);
 
             StringEntity entity = new StringEntity(jsonParam.toString(), HTTP.UTF_8);
+            httpPatch.setEntity(entity);
+
+            response = httpClient.execute(httpPatch);
+            System.out.println("响应状态为:" + response.getStatusLine());
+
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+        return response;
+    }
+
+    public HttpResponse sendHttpsPatch2(String url, Map map,String token) {
+        HttpClient httpClient = null;
+        HttpPatch httpPatch = null;
+        HttpResponse response = null;
+        try {
+            httpClient = new SSLClient();
+            httpPatch = new HttpPatch(url);
+
+            // Header
+            httpPatch.setHeader("Content-Type","application/json");
+            httpPatch.setHeader("X-Auth-Token",token);
+
+            // Entity
+            String jsonString = JSON.toJSONString(map);
+
+            StringEntity entity = new StringEntity(jsonString, "UTF-8");
             httpPatch.setEntity(entity);
 
             response = httpClient.execute(httpPatch);

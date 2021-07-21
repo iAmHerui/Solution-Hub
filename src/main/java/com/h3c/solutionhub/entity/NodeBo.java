@@ -5,6 +5,9 @@ import lombok.Data;
 @Data
 public class NodeBo {
 
+    // 节点ID
+    private int nodeId;
+
     // 节点名称
     private String nodeName;
 

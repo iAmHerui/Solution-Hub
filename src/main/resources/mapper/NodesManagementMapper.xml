@@ -4,6 +4,7 @@
 
     <select id="getNodeList" resultType="com.h3c.solutionhub.entity.NodeBo">
         SELECT
+            id as nodeId,
             node_name as nodeName,
             node_hdm_ip as nodeHDMIP,
             node_type as nodeType,
