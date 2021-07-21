@@ -106,7 +106,7 @@ public class HttpClientUtil {
             httpPatch.setEntity(entity);
 
             response = httpClient.execute(httpPatch);
-
+            System.out.println("响应状态为:" + response.getStatusLine());
 
         } catch (Exception ex) {
             ex.printStackTrace();

@@ -41,7 +41,7 @@ public class HttpClientTest {
     public void HttpsPatch() {
         HttpClientUtil httpClientUtil = new HttpClientUtil();
 
-        String url = "https://170.0.0.36/redfish/v1/Systems/1";
+        String url = "https://210.0.12.23/redfish/v1/Systems/1";
 
         HashMap<String, Object> map = new HashMap<>();
         map.put("AssetTag","solution_hub");
@@ -53,7 +53,7 @@ public class HttpClientTest {
 
         map.put("Boot",childMap);
 
-        httpClientUtil.sendHttpsPatch(url,map,"W3zFhEa8vtbvR/RBJDM2hb25ZD/2r3PEVARueoMV5Mk=");
+        httpClientUtil.sendHttpsPatch(url,map,"Lnee7pxOb6YF/UdDzcraI46XgocPeb8+JzRs8XTadq0=");
     }
 
     @Test
@@ -77,5 +77,16 @@ public class HttpClientTest {
 
 
         httpClientUtil.sendHttpsGet(url,null,"Og0utARSm4sslfLK6pXaDlPC7qJnrULjjIh+gzqs4m8=");
+    }
+
+    @Test
+    public void HttpsPost_reboot() {
+        String url = "https://210.0.12.23/redfish/v1/Systems/1/Actions/ComputerSystem.Reset";
+
+        HashMap<String, Object> map = new HashMap<>();
+        map.put("ResetType","ForceRestart");
+
+        HttpResponse response = new HttpClientUtil().sendHttpsPost(url,map,"Lnee7pxOb6YF/UdDzcraI46XgocPeb8+JzRs8XTadq0=");
+        System.out.println("reboot 响应状态为:" + response.getStatusLine());
     }
 }

@@ -17,6 +17,7 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
+import java.util.List;
 
 @Api(value = "文件管理",tags = "文件管理")
 @RestController
@@ -96,5 +97,19 @@ public class FileManagementController {
     @PostMapping(value = "/fileDelete")
     public Boolean fileDelete(String fileName) {
         return fileManagementService.deleteFileInfo(fileName);
+    }
+
+    @ApiOperation(value = "获取所有文件类型",notes = "获取所有文件类型")
+    @CrossOrigin(origins ="*",maxAge =3600)
+    @PostMapping(value = "/getAllProductType")
+    public List<String> getProductType() {
+        return fileManagementService.getAllProductType();
+    }
+
+    @ApiOperation(value = "根据文件类型获取所有版本信息",notes = "根据文件类型获取所有版本信息")
+    @CrossOrigin(origins ="*",maxAge =3600)
+    @PostMapping(value = "/getVersionByType")
+    public List<String> getVersionByType(String productType) {
+        return fileManagementService.getVersionByType(productType);
     }
 }

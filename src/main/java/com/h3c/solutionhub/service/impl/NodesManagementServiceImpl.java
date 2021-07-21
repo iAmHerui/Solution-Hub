@@ -111,25 +111,25 @@ public class NodesManagementServiceImpl implements NodesManagementService {
             node.setToken(token);
 
             // 2.获取管理节点mac
-            String mac = getManageNodeMac(node.getManagementIP(),token);
+            String mac = getManageNodeMac(node.getNodeHDMIP(),token);
             node.setManagementMAC(mac);
         }
 
-        // 3.生成配置文件dhcpd.conf
-        createConfFile(dhcpBO.getDhcpIPPond(),dhcpBO.getDhcpMask(),nodes);
-
-        // 4.创建子目录（/var/www/html/UUID/）执行mount
-        execLinuxCommand(mountShell);
-
-        // 5.生成配置文件 grub.cfg-宿主机IP16进制
-        createGrubConfFile(productType,productVersion);
+//        // 3.生成配置文件dhcpd.conf
+//        createConfFile(dhcpBO.getDhcpIPPond(),dhcpBO.getDhcpMask(),nodes);
+//
+//        // 4.创建子目录（/var/www/html/UUID/）执行mount
+//        execLinuxCommand(mountShell);
+//
+//        // 5.生成配置文件 grub.cfg-宿主机IP16进制
+//        createGrubConfFile(productType,productVersion);
 
         for(NodeBo node:nodes) {
             // 6.PXE模式执行
-            startPXE(node.getManagementIP(),node.getToken());
+            startPXE(node.getNodeHDMIP(),node.getToken());
 
             // 7.重启
-            reboot(node.getManagementIP(),node.getToken());
+            reboot(node.getNodeHDMIP(),node.getToken());
         }
         return true;
     }
@@ -207,11 +207,12 @@ public class NodesManagementServiceImpl implements NodesManagementService {
 
         map.put("Boot",childMap);
 
-        new HttpClientUtil().sendHttpsPatch(url,map,token);
+        HttpResponse response = new HttpClientUtil().sendHttpsPatch(url,map,token);
+        System.out.println("reboot 响应状态为:" + response.getStatusLine());
     }
 
     private void reboot(String nodeMangeIP,String token) {
-        String url = "https://"+nodeMangeIP+"/redfish/v1/Systems/system_id/Actions/ComputerSystem.Reset";
+        String url = "https://"+nodeMangeIP+"/redfish/v1/Systems/1/Actions/ComputerSystem.Reset";
 
         HashMap<String, Object> map = new HashMap<>();
         map.put("ResetType","ForceRestart");

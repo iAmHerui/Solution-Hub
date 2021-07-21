@@ -2,6 +2,8 @@ package com.h3c.solutionhub.service;
 
 import com.h3c.solutionhub.entity.FileBO;
 
+import java.util.List;
+
 public interface FileManagementService {
 
     Boolean insertFileInfo(FileBO fileBO);
@@ -9,4 +11,8 @@ public interface FileManagementService {
     Boolean deleteFileInfo(String fileName);
 
     Boolean mergeFile(String guid, FileBO fileBO);
+
+    List<String> getAllProductType();
+
+    List<String> getVersionByType(String productType);
 }

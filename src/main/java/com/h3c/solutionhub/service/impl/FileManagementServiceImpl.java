@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.List;
 
 @Service
 public class FileManagementServiceImpl implements FileManagementService {
@@ -97,6 +98,16 @@ public class FileManagementServiceImpl implements FileManagementService {
             return false;
         }
         return true;
+    }
+
+    @Override
+    public List<String> getAllProductType() {
+        return fileManagementMapper.selectAllProductType();
+    }
+
+    @Override
+    public List<String> getVersionByType(String productType) {
+        return fileManagementMapper.selectVersion(productType);
     }
 
     private Boolean createFile(File destTempFile,File parentFileDir,String guid) throws IOException{

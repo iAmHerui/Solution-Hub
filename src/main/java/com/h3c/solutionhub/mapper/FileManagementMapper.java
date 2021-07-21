@@ -3,6 +3,8 @@ package com.h3c.solutionhub.mapper;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
+import java.util.List;
+
 @Mapper
 public interface FileManagementMapper {
 
@@ -19,4 +21,8 @@ public interface FileManagementMapper {
 
     String getISOName(@Param("productType") String productType,
                       @Param("productVersion") String productVersion);
+
+    List<String> selectAllProductType();
+
+    List<String> selectVersion(@Param("productType") String productType);
 }

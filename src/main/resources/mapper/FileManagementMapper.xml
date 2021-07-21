@@ -39,4 +39,15 @@
             file_type = 'iso'
     </select>
 
+    <select id="selectAllProductType" resultType="string">
+        SELECT DISTINCT product_type
+        FROM file_management
+    </select>
+
+    <select id="selectVersion" resultType="string">
+        SELECT DISTINCT product_version
+        FROM file_management
+        WHERE product_type = #{productType}
+    </select>
+
 </mapper>
