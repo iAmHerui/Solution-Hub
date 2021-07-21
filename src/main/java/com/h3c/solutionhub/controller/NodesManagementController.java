@@ -84,6 +84,7 @@ public class NodesManagementController {
         for(int i=0;i<jsonArray.size();i++) {
             JSONObject nodeBo = jsonArray.getJSONObject(i);
             NodeBo node = new NodeBo();
+            node.setNodeId(nodeBo.getInteger("nodeId"));
             node.setManagementIP(nodeBo.getString("managementIP"));
             node.setNodeName(nodeBo.getString("nodeName"));
             nodes.add(node);

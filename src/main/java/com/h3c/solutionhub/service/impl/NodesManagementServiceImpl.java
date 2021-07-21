@@ -129,7 +129,7 @@ public class NodesManagementServiceImpl implements NodesManagementService {
             startPXE(node.getNodeHDMIP(),node.getToken());
 
             // 修改节点状态
-
+            nodesManagementMapper.updateNodeStatus(node.getNodeId());
 
             // 7.重启
             reboot(node.getNodeHDMIP(),node.getToken());

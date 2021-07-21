@@ -52,5 +52,5 @@ public interface NodesManagementMapper {
                          @Param("storageMask") String storageMask,
                          @Param("storageGateway") String storageGateway);
 
-    Boolean updateNodeStatus();
+    Boolean updateNodeStatus(@Param("nodeId") int nodeId);
 }

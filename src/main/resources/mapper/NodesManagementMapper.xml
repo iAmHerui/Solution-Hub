@@ -104,7 +104,13 @@
             storage_mask = #{storageMask,jdbcType=VARCHAR},
             storage_gateway = #{storageGateway,jdbcType=VARCHAR}
         WHERE node_hdm_ip = #{nodeHDMIP,jdbcType=VARCHAR}
-</update>
+    </update>
+
+    <update id="updateNodeStatus">
+        UPDATE node_management
+        SET node_status = '占用'
+        WHERE id = #{nodeId,jdbcType=INTEGER}
+    </update>
 
 
 </mapper>
