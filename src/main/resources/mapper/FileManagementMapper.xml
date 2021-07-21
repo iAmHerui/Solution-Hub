@@ -47,7 +47,6 @@
     <select id="selectVersion" resultType="string">
         SELECT DISTINCT product_version
         FROM file_management
-        WHERE product_type = #{productType}
     </select>
 
 </mapper>

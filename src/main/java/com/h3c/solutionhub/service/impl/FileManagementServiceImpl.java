@@ -106,8 +106,8 @@ public class FileManagementServiceImpl implements FileManagementService {
     }
 
     @Override
-    public List<String> getVersionByType(String productType) {
-        return fileManagementMapper.selectVersion(productType);
+    public List<String> getVersionByType() {
+        return fileManagementMapper.selectVersion();
     }
 
     private Boolean createFile(File destTempFile,File parentFileDir,String guid) throws IOException{

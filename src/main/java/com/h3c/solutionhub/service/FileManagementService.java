@@ -14,5 +14,5 @@ public interface FileManagementService {
 
     List<String> getAllProductType();
 
-    List<String> getVersionByType(String productType);
+    List<String> getVersionByType();
 }

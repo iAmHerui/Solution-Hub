@@ -101,15 +101,15 @@ public class FileManagementController {
 
     @ApiOperation(value = "获取所有文件类型",notes = "获取所有文件类型")
     @CrossOrigin(origins ="*",maxAge =3600)
-    @PostMapping(value = "/getAllProductType")
+    @GetMapping(value = "/getAllProductType")
     public List<String> getProductType() {
         return fileManagementService.getAllProductType();
     }
 
     @ApiOperation(value = "根据文件类型获取所有版本信息",notes = "根据文件类型获取所有版本信息")
     @CrossOrigin(origins ="*",maxAge =3600)
-    @PostMapping(value = "/getVersionByType")
-    public List<String> getVersionByType(String productType) {
-        return fileManagementService.getVersionByType(productType);
+    @GetMapping(value = "/getVersionByType")
+    public List<String> getVersionByType() {
+        return fileManagementService.getVersionByType();
     }
 }

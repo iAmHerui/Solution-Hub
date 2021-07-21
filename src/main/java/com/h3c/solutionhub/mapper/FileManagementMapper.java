@@ -24,5 +24,5 @@ public interface FileManagementMapper {
 
     List<String> selectAllProductType();
 
-    List<String> selectVersion(@Param("productType") String productType);
+    List<String> selectVersion();
 }
