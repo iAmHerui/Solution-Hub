@@ -120,10 +120,11 @@ public class NodesManagementServiceImpl implements NodesManagementService {
         // 4.执行mount
         execLinuxCommand(productType, productVersion);
 
-        // 5.生成配置文件 grub.cfg-宿主机IP16进制
-        createGrubConfFile(productType,productVersion);
-
         for(NodeBo node:nodes) {
+
+            // 5.生成配置文件 grub.cfg-nodeManageIP16进制
+            createGrubConfFile(productType,productVersion,node.getManagementIP());
+
             // 6.PXE模式执行
             startPXE(node.getNodeHDMIP(),node.getToken());
 
@@ -260,7 +261,7 @@ public class NodesManagementServiceImpl implements NodesManagementService {
     /**
      * 生成配置文件grub.cfg
      */
-    private void createGrubConfFile(String productType, String productVersion) {
+    private void createGrubConfFile(String productType, String productVersion,String nodeManageIp) {
 
         //获取文件名，不要后缀
         String isoName = fileManagementMapper.getISOName(productType,productVersion);
@@ -297,7 +298,7 @@ public class NodesManagementServiceImpl implements NodesManagementService {
                         "       initrdefi /images/pxeboot/initrd.img\n"+
                         "}\n";
 
-        createFileForGrubConf(fileInfo,grubFilePath+"-"+to16(hostIP()));
+        createFileForGrubConf(fileInfo,grubFilePath+"-"+to16(nodeManageIp));
     }
 
     private void createFileForDHCPConf(String fileInfo,String filePath) {
