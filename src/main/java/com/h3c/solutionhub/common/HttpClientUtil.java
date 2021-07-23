@@ -44,8 +44,8 @@ public class HttpClientUtil {
 
             System.out.println("响应状态为:" + response.getStatusLine());
 //            System.out.println("响应内容为:" + EntityUtils.toString(httpEntity));
-            String string = EntityUtils.toString(httpEntity);
-            System.out.println("MAC:"+string.substring(string.indexOf("[\"")+2,string.lastIndexOf("\"]")));
+//            String string = EntityUtils.toString(httpEntity);
+//            System.out.println("MAC:"+string.substring(string.indexOf("[\"")+2,string.lastIndexOf("\"]")));
         } catch (Exception ex) {
             ex.printStackTrace();
         }

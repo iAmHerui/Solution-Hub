@@ -17,9 +17,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.io.*;
-import java.net.Inet4Address;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
+import java.net.*;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
 
@@ -185,7 +184,7 @@ public class NodesManagementServiceImpl implements NodesManagementService {
     }
 
     private String getManageNodeMac(String nodeMangeIP,String token) {
-        String url = "https://"+nodeMangeIP+"/redfish/v1/Chassis/1/NetworkAdapters/PCIeSlot1/NetworkPorts/1";
+        String url = "https://"+nodeMangeIP+"/redfish/v1/Chassis/1/NetworkAdapters/mLOM/NetworkPorts/1";
 
 //        ResponseEntity responseEntity =restTemplateTool.sendHttps(url,null, HttpMethod.GET,token);
         HttpResponse response = new HttpClientUtil().sendHttpsGet(url,null,token);
@@ -193,15 +192,15 @@ public class NodesManagementServiceImpl implements NodesManagementService {
         HttpEntity httpEntity = response.getEntity();
 
         log.info("响应状态为:" + response.getStatusLine());
-        String string = null;
+        String string = "";
         try {
             string = EntityUtils.toString(httpEntity);
         } catch (IOException e) {
+            log.info("i am here");
             e.printStackTrace();
         }
         String mac = string.substring(string.indexOf("[\"")+2,string.lastIndexOf("\"]"));
-        log.info("MAC:"+mac);
-
+        System.out.println("MAC: "+mac);
         return mac;
     }
 
@@ -249,19 +248,22 @@ public class NodesManagementServiceImpl implements NodesManagementService {
                     "default-lease-time 600;\n" +
                             "max-lease-time 7200;\n" +
                             "subnet " + dhcpIPPond + " netmask " + dhcpMask + " {\n" +
-                            "filename \"BOOTX64.EFI\"\n" +
+                            "filename \"BOOTX64.EFI\";\n" +
                             "next-server " + hostIP() + ";\n" +
                             "}\n";
         }
         for(NodeBo nodeBo:nodeList) {
-            String mac = nodeBo.getManagementMAC();
-            String ip = nodeBo.getManagementIP();
-            String confNodeInfo =
-                    "host "+nodeBo.getNodeName()+ " {\n"+
-                            "    hardware ethernet "+mac+";\n"+
-                            "    fixed-address "+ip+";\n"+
-                            "}\n";
-            confInfo=confInfo+confNodeInfo;
+            if(!nodesManagementMapper.selectNodeStatus(nodeBo.getNodeName()).equals("占用")) {
+                log.info("nodeName: "+nodeBo.getNodeName()+" 该节点未占用，添加DHCP配置");
+                String mac = nodeBo.getManagementMAC();
+                String ip = nodeBo.getManagementIP();
+                String confNodeInfo =
+                        "host " + nodeBo.getNodeName() + " {\n" +
+                                "    hardware ethernet " + mac + ";\n" +
+                                "    fixed-address " + ip + ";\n" +
+                                "}\n";
+                confInfo = confInfo + confNodeInfo;
+            }
         }
         createFileForDHCPConf(confInfo,filePath);
     }
@@ -297,13 +299,13 @@ public class NodesManagementServiceImpl implements NodesManagementService {
                         "search --no-floppy --set=root -l 'CentOS 7 x86_64'\n"+
                         "\n"+
                         "menuentry 'Install CAS-x86_64' --class fedora --class gnu-linux --class gnu --class os {\n"+
-                        "       linuxefi /images/pxeboot/vmlinuz\n"+
-                        "       inst.stage2=http://"+hostIP()+"/"+productVersion+"/"+prefixName+"/"+"\n"+
-                        "       inst.ks=http://"+hostIP()+"/ks/"+productVersion+"/ks-auto.cfg"+"\n"+
-                        "       net.ifnames=0\n"+
-                        "       biosdevname=0\n"+
-                        "       quiet\n"+
-                        "       initrdefi /images/pxeboot/initrd.img\n"+
+                        "       linuxefi /images/pxeboot/vmlinuz "+
+                        "inst.stage2=http://"+hostIP()+"/"+productVersion+"/"+prefixName+"/"+" "+
+                        "inst.ks=http://"+hostIP()+"/ks/"+productVersion+"/ks-auto.cfg"+" "+
+                        "net.ifnames=0 "+
+                        "biosdevname=0 "+
+                        "quiet "+
+                        "initrdefi /images/pxeboot/initrd.img\n"+
                         "}\n";
 
         createFileForGrubConf(fileInfo,grubFilePath+"-"+to16(nodeManageIp));
@@ -330,16 +332,19 @@ public class NodesManagementServiceImpl implements NodesManagementService {
     private void createFileForGrubConf(String fileInfo,String filePath) {
         try {
             File file = new File(filePath);
+            // 如果grub存在，将不会写入任何数据
             if (!file.exists()) {
                 file.getParentFile().mkdirs();
                 file.createNewFile();
+
+                OutputStreamWriter fw = new OutputStreamWriter(new FileOutputStream(file),"UTF-8");
+                BufferedWriter bw = new BufferedWriter(fw);
+                bw.write(fileInfo);
+                bw.flush();
+                bw.close();
+                fw.close();
             }
-            OutputStreamWriter fw = new OutputStreamWriter(new FileOutputStream(file),"UTF-8");
-            BufferedWriter bw = new BufferedWriter(fw);
-            bw.write(fileInfo);
-            bw.flush();
-            bw.close();
-            fw.close();
+
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -388,14 +393,41 @@ public class NodesManagementServiceImpl implements NodesManagementService {
             return sb.toString();
     }
 
+//    private String hostIP() {
+//        InetAddress ip4 = null;
+//        try {
+//            ip4 = Inet4Address.getLocalHost();
+//        } catch (UnknownHostException e) {
+//            e.printStackTrace();
+//        }
+//        return ip4.getHostAddress();
+//    }
+
     private String hostIP() {
-        InetAddress ip4 = null;
+        String ip = "";
         try {
-            ip4 = Inet4Address.getLocalHost();
-        } catch (UnknownHostException e) {
+            Enumeration<?> enumeration = NetworkInterface.getNetworkInterfaces();
+            while (enumeration.hasMoreElements()) {
+                NetworkInterface ni = (NetworkInterface) enumeration.nextElement();
+                if (!ni.getName().equals("eno1")) {
+                    continue;
+                } else {
+                    Enumeration<?> e2 = ni.getInetAddresses();
+                    while (e2.hasMoreElements()) {
+                        InetAddress ia = (InetAddress) e2.nextElement();
+                        if (ia instanceof Inet6Address)
+                            continue;
+                        ip = ia.getHostAddress();
+                    }
+                    break;
+                }
+            }
+        } catch (SocketException e) {
             e.printStackTrace();
+//                System.exit(-1);
         }
-        return ip4.getHostAddress();
+        log.info("当前 IP 所属网卡 eno1");
+        return ip;
     }
 
 }

@@ -53,4 +53,6 @@ public interface NodesManagementMapper {
                          @Param("storageGateway") String storageGateway);
 
     Boolean updateNodeStatus(@Param("nodeId") int nodeId);
+
+    String selectNodeStatus(@Param("nodeName") String nodeName);
 }

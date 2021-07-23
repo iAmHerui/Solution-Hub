@@ -81,7 +81,7 @@
         SELECT COUNT(1)
         FROM dhcp
     </select>
-    
+
     <delete id="deleteDHCPInfo">
         DELETE FROM dhcp WHERE 1=1
     </delete>
@@ -112,5 +112,10 @@
         WHERE id = #{nodeId,jdbcType=INTEGER}
     </update>
 
+    <select id="selectNodeStatus" resultType="string">
+        SELECT node_status
+        FROM node_management
+        WHERE node_name = #{nodeName,jdbcType=VARCHAR}
+    </select>
 
 </mapper>

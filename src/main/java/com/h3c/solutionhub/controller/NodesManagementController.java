@@ -11,7 +11,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
+import java.net.*;
 import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.List;
 import java.util.Map;
 
@@ -86,13 +88,14 @@ public class NodesManagementController {
             JSONObject nodeBo = jsonArray.getJSONObject(i);
             NodeBo node = new NodeBo();
             node.setNodeId(nodeBo.getInteger("nodeId"));
+            node.setNodeHDMIP(nodeBo.getString("nodeHDMIP"));
             node.setManagementIP(nodeBo.getString("managementIP"));
             node.setNodeName(nodeBo.getString("nodeName"));
             nodes.add(node);
         }
         return nodesManagementService.deployNode(productType,productVersion,nodes);
     }
-    
+
     @ApiOperation(value = "查看DHCP地址",notes = "查看DHCP地址")
     @CrossOrigin(origins ="*",maxAge =3600)
     @GetMapping(value = "/getDHCPInfo")
@@ -124,4 +127,47 @@ public class NodesManagementController {
             e.printStackTrace();
         }
     }
+
+    @ApiOperation(value = "获取本机IP",notes = "获取本机IP")
+    @CrossOrigin(origins ="*",maxAge =3600)
+    @GetMapping(value = "/getHostIP")
+    public String getHostIP(String eth) {
+        String ip = "";
+        try {
+            Enumeration<?> enumeration = NetworkInterface.getNetworkInterfaces();
+            while (enumeration.hasMoreElements()) {
+                NetworkInterface ni = (NetworkInterface) enumeration.nextElement();
+                if (!ni.getName().equals(eth)) {
+                    continue;
+                } else {
+                    Enumeration<?> e2 = ni.getInetAddresses();
+                    while (e2.hasMoreElements()) {
+                        InetAddress ia = (InetAddress) e2.nextElement();
+                        if (ia instanceof Inet6Address)
+                            continue;
+                        ip = ia.getHostAddress();
+                    }
+                    break;
+                }
+            }
+        } catch (SocketException e) {
+            e.printStackTrace();
+//                System.exit(-1);
+        }
+        return ip;
+    }
+
+    @ApiOperation(value = "获取本机IP2",notes = "获取本机IP2")
+    @CrossOrigin(origins ="*",maxAge =3600)
+    @GetMapping(value = "/getHostIP2")
+    public String getHostIP2() {
+        InetAddress ip4 = null;
+        try {
+            ip4 = Inet4Address.getLocalHost();
+        } catch (UnknownHostException e) {
+            e.printStackTrace();
+        }
+        return ip4.getHostAddress();
+    }
+
 }

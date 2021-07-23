@@ -1,12 +1,15 @@
 package com.h3c.solutionhub.common;
 
 import com.alibaba.fastjson.JSONObject;
+import com.h3c.solutionhub.entity.NodeBo;
+import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPatch;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.protocol.HTTP;
+import org.apache.http.util.EntityUtils;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -69,11 +72,24 @@ public class HttpClientTest {
     public void HttpsGet() {
         HttpClientUtil httpClientUtil = new HttpClientUtil();
 
-        String url = "https://210.0.12.23/redfish/v1/Chassis/1/NetworkAdapters/PCIeSlot1/NetworkPorts/1";
+        String url = "https://210.0.12.23/redfish/v1/Chassis/1/NetworkAdapters/mLOM/NetworkPorts/1";
 
+        HttpResponse response = new HttpClientUtil().sendHttpsGet(url,null,"0ny1TUTv3IdP/mImBuOzx+T6IQYSEzrUcibAl5GW4zg=");
 
-        httpClientUtil.sendHttpsGet(url,null,"Og0utARSm4sslfLK6pXaDlPC7qJnrULjjIh+gzqs4m8=");
+        HttpEntity httpEntity = response.getEntity();
+        NodeBo nodeBo = new NodeBo();
+//        String string = "";
+        try {
+//            System.out.println(EntityUtils.toString(httpEntity));
+            String string = EntityUtils.toString(httpEntity);
+            String mac = string.substring(string.indexOf("[\"")+2,string.lastIndexOf("\"]"));
+            System.out.println("MAC: "+mac);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
     }
+
 
     @Test
     public void HttpsPost_reboot() {
