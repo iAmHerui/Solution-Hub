@@ -103,36 +103,45 @@ public class NodesManagementServiceImpl implements NodesManagementService {
 
         // 获取当前DHCP地址
         DhcpBO dhcpBO = nodesManagementMapper.selectDHCPInfo();
+        log.info("DHCP info SUCCESS");
 
         for(NodeBo node:nodes) {
+            log.info("当前nodeName: "+node.getNodeName()+" ,HDMIp: "+node.getNodeHDMIP());
             // 1.获取token
             String token = getToken(node.getNodeHDMIP());
+            log.info("当前nodeName: "+node.getNodeName()+" ,token: "+token);
             node.setToken(token);
 
             // 2.获取管理节点mac
             String mac = getManageNodeMac(node.getNodeHDMIP(),token);
+            log.info("当前nodeName: "+node.getNodeName()+" ,mac: "+mac);
             node.setManagementMAC(mac);
         }
 
         // 3.生成配置文件dhcpd.conf
         createConfFile(dhcpBO.getDhcpIPPond(),dhcpBO.getDhcpMask(),nodes);
+        log.info("dhcpd.conf 文件已生成");
 
         // 4.执行mount
-        execLinuxCommand(productType, productVersion);
+        Boolean result = execLinuxCommand(productType, productVersion);
+        log.info("mount 执行 "+result);
 
         for(NodeBo node:nodes) {
 
             // 5.生成配置文件 grub.cfg-nodeManageIP16进制
             createGrubConfFile(productType,productVersion,node.getManagementIP());
+            log.info("grub.cfg 文件已生成");
 
             // 6.PXE模式执行
             startPXE(node.getNodeHDMIP(),node.getToken());
+            log.info("当前nodeName: "+node.getNodeName()+" ,PXE配置下发成功");
 
             // 修改节点状态
             nodesManagementMapper.updateNodeStatus(node.getNodeId());
 
             // 7.重启
             reboot(node.getNodeHDMIP(),node.getToken());
+            log.info("当前nodeName: "+node.getNodeName()+" ,已强制重启");
         }
         return true;
     }
@@ -164,15 +173,14 @@ public class NodesManagementServiceImpl implements NodesManagementService {
 //        ResponseEntity responseEntity =restTemplateTool.sendHttps(url,map, HttpMethod.POST,null);
         HttpResponse response = new HttpClientUtil().sendHttpsPost(url,map,"");
         Header[] headers = response.getAllHeaders();
-        System.out.println("响应状态为:" + response.getStatusLine());
+        log.info("响应状态为:" + response.getStatusLine());
         for(Header header:headers) {
             if(header.getName().equals("X-Auth-Token")) {
-                System.out.println(header);
+                log.info("获取token成功");
                 return header.getValue();
-
             }
         }
-        System.out.println("为获取到token");
+        log.info("获取token失败");
         return null;
     }
 
@@ -184,7 +192,7 @@ public class NodesManagementServiceImpl implements NodesManagementService {
 
         HttpEntity httpEntity = response.getEntity();
 
-        System.out.println("响应状态为:" + response.getStatusLine());
+        log.info("响应状态为:" + response.getStatusLine());
         String string = null;
         try {
             string = EntityUtils.toString(httpEntity);
@@ -192,7 +200,7 @@ public class NodesManagementServiceImpl implements NodesManagementService {
             e.printStackTrace();
         }
         String mac = string.substring(string.indexOf("[\"")+2,string.lastIndexOf("\"]"));
-        System.out.println("MAC:"+mac);
+        log.info("MAC:"+mac);
 
         return mac;
     }
