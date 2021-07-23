@@ -304,8 +304,8 @@ public class NodesManagementServiceImpl implements NodesManagementService {
                         "inst.ks=http://"+hostIP()+"/ks/"+productVersion+"/ks-auto.cfg"+" "+
                         "net.ifnames=0 "+
                         "biosdevname=0 "+
-                        "quiet "+
-                        "initrdefi /images/pxeboot/initrd.img\n"+
+                        "quiet\n"+
+                        "       initrdefi /images/pxeboot/initrd.img\n"+
                         "}\n";
 
         createFileForGrubConf(fileInfo,grubFilePath+"-"+to16(nodeManageIp));
