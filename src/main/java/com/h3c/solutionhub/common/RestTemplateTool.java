@@ -69,6 +69,4 @@ public class RestTemplateTool {
         return responseEntity;
     }
 
-    // TODO RestTemplate发送HTTPs PATCH请求
-
 }

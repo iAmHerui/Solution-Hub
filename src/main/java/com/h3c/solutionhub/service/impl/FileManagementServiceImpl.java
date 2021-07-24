@@ -10,9 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
+import java.io.*;
 import java.util.List;
 
 @Service
@@ -78,6 +76,14 @@ public class FileManagementServiceImpl implements FileManagementService {
                     File destTempFile = new File(filePath,fileBO.getFileName());
                     // 创建文件
                     createFile(destTempFile,parentFileDir,guid);
+                    log.info("ks-auto.cfg文件创建成功");
+                    
+                    // TODO ks-auto.cfg字符串替换:cdrom ->
+                    String path = filePath+"/"+fileBO.getFileName();
+                    String srcStr = "cdrom";
+                    String replaceStr = "url --url http://210.0.0.233/E0710/H3C_CAS-E0710-centos-x86_64/";
+                    strReplace(path,srcStr,replaceStr);
+                    log.info("ks-auto.cfg文件内容cdrom已替换");
                 }
             } else {
                 File parentFileDir = new File(tempFilePath+guid);
@@ -145,5 +151,43 @@ public class FileManagementServiceImpl implements FileManagementService {
             destTempfos.close();
         }
         return true;
+    }
+
+    private void strReplace(String path,String srcStr,String replaceStr) {
+        File file = new File(path);
+        BufferedReader bufIn = null;
+        FileWriter out = null;
+        try {
+            FileReader in = new FileReader(file);
+            bufIn = new BufferedReader(in);
+            // 内存流, 作为临时流
+            CharArrayWriter tempStream = new CharArrayWriter();
+            // 替换
+            String line = null;
+            while ((line = bufIn.readLine()) != null) {
+                // 替换每行中, 符合条件的字符串
+                line = line.replaceAll(srcStr, replaceStr);
+                // 将该行写入内存
+                tempStream.write(line);
+                // 添加操作系统对应的换行符
+                tempStream.append(System.getProperty("line.separator"));
+            }
+
+            // 将内存中的流 写入 文件
+            out = new FileWriter(file);
+            tempStream.writeTo(out);
+
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                bufIn.close();
+                out.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
     }
 }
