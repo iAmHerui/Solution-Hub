@@ -45,36 +45,51 @@ public class NodesManagementController {
     @ApiOperation(value = "节点添加",notes = "节点添加")
     @CrossOrigin(origins ="*",maxAge =3600)
     @PostMapping(value = "/nodeAdd")
-    public Boolean nodeAdd(NodeBo nodeBo) {
+    public String nodeAdd(NodeBo nodeBo) {
         if(nodesManagementService.isNodeExist(nodeBo.getNodeName())) {
             log.info("nodeName不存在重复，开始添加");
             nodeBo.setNodeStatus("空闲");
-            return nodesManagementService.insertNode(nodeBo);
+            Boolean result =  nodesManagementService.insertNode(nodeBo);
+            if(result==true) {
+                return "节点添加成功";
+            } else {
+                return "节点添加失败";
+            }
         } else {
             log.info("node已存在");
-            return false;
+            return "节点已存在，添加失败";
         }
     }
 
     @ApiOperation(value = "节点编辑",notes = "节点编辑")
     @CrossOrigin(origins ="*",maxAge =3600)
     @PutMapping(value = "/nodeEdit")
-    public Boolean nodeEdit(NodeBo nodeBo) {
-        return nodesManagementService.editNode(nodeBo);
+    public String nodeEdit(NodeBo nodeBo) {
+        Boolean result =  nodesManagementService.editNode(nodeBo);
+        if(result==true) {
+            return "节点编辑成功";
+        } else {
+            return "节点编辑失败";
+        }
     }
 
 
     @ApiOperation(value = "节点删除",notes = "节点删除")
     @CrossOrigin(origins ="*",maxAge =3600)
     @PostMapping(value = "/nodeDelete")
-    public Boolean nodeDelete(String nodeName) {
-        return nodesManagementService.deleteNode(nodeName);
+    public String nodeDelete(String nodeName) {
+        Boolean result = nodesManagementService.deleteNode(nodeName);
+        if(result==true) {
+            return "节点删除成功";
+        } else {
+            return "节点删除失败";
+        }
     }
 
     @ApiOperation(value = "节点部署",notes = "节点部署")
     @CrossOrigin(origins ="*",maxAge =3600)
     @PostMapping(value = "/nodeDeploy")
-    public Boolean nodeDeploy(@RequestBody Map<String,Object> params) {
+    public String nodeDeploy(@RequestBody Map<String,Object> params) {
 
         String productType = params.get("productType").toString();
         String productVersion = params.get("productVersion").toString();
@@ -91,7 +106,12 @@ public class NodesManagementController {
             node.setNodeName(nodeBo.getString("nodeName"));
             nodes.add(node);
         }
-        return nodesManagementService.deployNode(productType,productVersion,nodes);
+        Boolean result = nodesManagementService.deployNode(productType,productVersion,nodes);
+        if(result==true) {
+            return "节点部署成功";
+        } else {
+            return "节点部署失败";
+        }
     }
 
     @ApiOperation(value = "查看DHCP地址",notes = "查看DHCP地址")
@@ -104,8 +124,13 @@ public class NodesManagementController {
     @ApiOperation(value = "添加DHCP地址",notes = "添加DHCP地址")
     @CrossOrigin(origins ="*",maxAge =3600)
     @PostMapping(value = "/addDHCPInfo")
-    public Boolean addDHCPInfo(String dhcpIPPond, String dhcpMask) {
-        return nodesManagementService.addDHCPInfo(dhcpIPPond,dhcpMask);
+    public String addDHCPInfo(String dhcpIPPond, String dhcpMask) {
+        Boolean result = nodesManagementService.addDHCPInfo(dhcpIPPond,dhcpMask);
+        if(result==true) {
+            return "DHCP地址添加成功";
+        } else {
+            return "DHCP地址添加失败";
+        }
     }
 
     @ApiOperation(value = "执行shell",notes = "执行shell")

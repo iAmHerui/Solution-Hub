@@ -92,15 +92,25 @@ public class FileManagementController {
     @CrossOrigin(origins ="*",maxAge =3600)
     @PostMapping("/merge")
     @ResponseBody
-    public Boolean mergeFile(String guid, FileBO fileBO) {
-        return fileManagementService.mergeFile(guid,fileBO);
+    public String mergeFile(String guid, FileBO fileBO) {
+        Boolean result = fileManagementService.mergeFile(guid,fileBO);
+        if(result==true) {
+            return "文件上传成功";
+        } else {
+            return "文件上传失败";
+        }
     }
 
     @ApiOperation(value = "文件删除",notes = "文件删除")
     @CrossOrigin(origins ="*",maxAge =3600)
     @PostMapping(value = "/fileDelete")
-    public Boolean fileDelete(String fileName) {
-        return fileManagementService.deleteFileInfo(fileName);
+    public String fileDelete(String fileName) {
+        Boolean result = fileManagementService.deleteFileInfo(fileName);
+        if(result==true) {
+            return "文件删除成功";
+        } else {
+            return "文件删除失败";
+        }
     }
 
     @ApiOperation(value = "获取所有文件类型",notes = "获取所有文件类型")
