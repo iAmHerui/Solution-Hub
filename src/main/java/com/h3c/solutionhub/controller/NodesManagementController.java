@@ -7,6 +7,8 @@ import com.h3c.solutionhub.entity.NodeBo;
 import com.h3c.solutionhub.service.NodesManagementService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -22,6 +24,8 @@ import java.util.Map;
 @CrossOrigin
 @RequestMapping(value = "/nodesManagement")
 public class NodesManagementController {
+
+    private static final Logger log = LoggerFactory.getLogger(NodesManagementController.class);
 
     @Autowired
     NodesManagementService nodesManagementService;
@@ -42,20 +46,14 @@ public class NodesManagementController {
     @CrossOrigin(origins ="*",maxAge =3600)
     @PostMapping(value = "/nodeAdd")
     public Boolean nodeAdd(NodeBo nodeBo) {
-//        /** test **/
-//        nodeBo.setNodeName("cas-node1");
-//        nodeBo.setNodeHDMIP("172.17.0.2");
-//        nodeBo.setNodeType("CAS");
-        nodeBo.setNodeStatus("空闲");
-//        nodeBo.setNodeHDMPaasword("Password@_");
-//        nodeBo.setManagementIP("192.168.0.2");
-//        nodeBo.setBusinessIP("192.168.1.2");
-//        nodeBo.setManagementMask("255.255.255.0");
-//        nodeBo.setBusinessMask("255.255.255.0");
-//        nodeBo.setManagementGateway("192.168.0.1");
-//        nodeBo.setBusinessGateway("192.168.1.1");
-//        /** test **/
-        return nodesManagementService.insertNode(nodeBo);
+        if(nodesManagementService.isNodeExist(nodeBo.getNodeName())) {
+            log.info("nodeName不存在重复，开始添加");
+            nodeBo.setNodeStatus("空闲");
+            return nodesManagementService.insertNode(nodeBo);
+        } else {
+            log.info("node已存在");
+            return false;
+        }
     }
 
     @ApiOperation(value = "节点编辑",notes = "节点编辑")

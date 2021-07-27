@@ -7,6 +7,8 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.apache.commons.io.FileUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.*;
@@ -23,6 +25,8 @@ import java.util.List;
 @RequestMapping(value = "/fileManagement")
 public class FileManagementController {
 
+    private static final Logger log = LoggerFactory.getLogger(FileManagementController.class);
+
     @Autowired
     UploadFileService uploadFileService;
 
@@ -31,6 +35,13 @@ public class FileManagementController {
 
     @Value("${tempFilePath}")
     private String tempFilePath;
+
+    @ApiOperation(value = "判断文件是否已上传",notes = "判断文件是否已上传")
+    @CrossOrigin(origins ="*",maxAge =3600)
+    @GetMapping(value = "/isFileExist")
+    public Boolean isFileExist(String fileName,String productVersion) {
+        return fileManagementService.isFileExist(fileName,productVersion);
+    }
 
     /**
      * 上传文件,进行分片存储
@@ -43,7 +54,7 @@ public class FileManagementController {
      * @param chunks
      */
     @CrossOrigin(origins ="*",maxAge =3600)
-    @RequestMapping("/upload")
+    @PostMapping("/upload")
     public void bigFile(HttpServletRequest request,
                         HttpServletResponse response,
                         String guid,
@@ -63,6 +74,7 @@ public class FileManagementController {
                 // 分片处理时，前台会多次调用上传接口，每次都会上传文件的一部分到后台
                 File tempPartFile = new File(parentFileDir, guid + "_" + chunk + ".part");
                 FileUtils.copyInputStreamToFile(file.getInputStream(), tempPartFile);
+                log.info("第 "+chunk+" 分片已上传");
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -78,13 +90,9 @@ public class FileManagementController {
      */
     @ApiOperation(value = "文件合并",notes = "文件合并")
     @CrossOrigin(origins ="*",maxAge =3600)
-    @RequestMapping("/merge")
+    @PostMapping("/merge")
     @ResponseBody
     public Boolean mergeFile(String guid, FileBO fileBO) {
-//        /** test **/
-//        fileBO.setFileName("何锐-简历.docx");
-//        fileBO.setProductVersion("E0701");
-//        /** test **/
         return fileManagementService.mergeFile(guid,fileBO);
     }
 
@@ -108,4 +116,5 @@ public class FileManagementController {
     public List<String> getVersionByType() {
         return fileManagementService.getVersionByType();
     }
+
 }

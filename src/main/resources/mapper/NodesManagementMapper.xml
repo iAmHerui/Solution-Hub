@@ -118,4 +118,10 @@
         WHERE node_name = #{nodeName,jdbcType=VARCHAR}
     </select>
 
+    <select id="isNodeExist" resultType="int">
+        SELECT COUNT(1)
+        FROM  node_management
+        WHERE node_name = #{nodeName,jdbcType=VARCHAR}
+    </select>
+
 </mapper>

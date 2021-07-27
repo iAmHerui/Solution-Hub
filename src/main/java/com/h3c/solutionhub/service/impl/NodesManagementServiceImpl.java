@@ -108,6 +108,11 @@ public class NodesManagementServiceImpl implements NodesManagementService {
             log.info("当前nodeName: "+node.getNodeName()+" ,HDMIp: "+node.getNodeHDMIP());
             // 1.获取token
             String token = getToken(node.getNodeHDMIP());
+            if(token==null) {
+                log.info("无法获取 "+node.getNodeName()+" token，部署失败");
+                return false;
+                // TODO 一期暂不支持批量部署
+            }
             log.info("当前nodeName: "+node.getNodeName()+" ,token: "+token);
             node.setToken(token);
 
@@ -116,6 +121,7 @@ public class NodesManagementServiceImpl implements NodesManagementService {
             log.info("当前nodeName: "+node.getNodeName()+" ,mac: "+mac);
             node.setManagementMAC(mac);
         }
+
 
         // 3.生成配置文件dhcpd.conf
         createConfFile(dhcpBO.getDhcpIPPond(),dhcpBO.getDhcpMask(),nodes);
@@ -161,6 +167,17 @@ public class NodesManagementServiceImpl implements NodesManagementService {
         return nodesManagementMapper.selectDHCPInfo();
     }
 
+    @Override
+    public Boolean isNodeExist(String nodeName) {
+        // 查询 nodeName 重名个数
+        int count = nodesManagementMapper.isNodeExist(nodeName);
+        if(count>0) {
+            return false;
+        } else {
+            return true;
+        }
+    }
+
 
     private String getToken(String nodeHDMIP) {
         String url = "https://"+nodeHDMIP+"/redfish/v1/SessionService/Sessions";
@@ -169,14 +186,15 @@ public class NodesManagementServiceImpl implements NodesManagementService {
         map.put("UserName","admin");
         map.put("Password","Password@_");
 
-//        ResponseEntity responseEntity =restTemplateTool.sendHttps(url,map, HttpMethod.POST,null);
         HttpResponse response = new HttpClientUtil().sendHttpsPost(url,map,"");
-        Header[] headers = response.getAllHeaders();
-        log.info("响应状态为:" + response.getStatusLine());
-        for(Header header:headers) {
-            if(header.getName().equals("X-Auth-Token")) {
-                log.info("获取token成功");
-                return header.getValue();
+        if(response!=null) {
+            log.info("响应状态为:" + response.getStatusLine());
+            Header[] headers = response.getAllHeaders();
+            for(Header header:headers) {
+                if(header.getName().equals("X-Auth-Token")) {
+                    log.info("获取token成功");
+                    return header.getValue();
+                }
             }
         }
         log.info("获取token失败");

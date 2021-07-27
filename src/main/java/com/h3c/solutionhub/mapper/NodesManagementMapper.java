@@ -55,4 +55,6 @@ public interface NodesManagementMapper {
     Boolean updateNodeStatus(@Param("nodeId") int nodeId);
 
     String selectNodeStatus(@Param("nodeName") String nodeName);
+
+    int isNodeExist(@Param("nodeName") String nodeName);
 }

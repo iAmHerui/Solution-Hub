@@ -25,6 +25,28 @@ public class FileManagementServiceImpl implements FileManagementService {
     private String tempFilePath;
 
     @Override
+    public Boolean isFileExist(String fileName,String productVersion) {
+
+        // 获取文件后缀
+        String suffix = fileName.substring(fileName.lastIndexOf(".")+1);
+
+        File destTempFile = null;
+
+        // iso和cfg要放在不同的目录下
+        if(suffix.equals("iso")) {
+                String filePath = tempFilePath+"iso/"+productVersion;
+                destTempFile = new File(filePath,fileName);
+        } else if(suffix.equals("cfg")) {
+                String filePath = tempFilePath+"www/html/ks/"+productVersion;
+                destTempFile = new File(filePath,fileName);
+        } else {
+                String filePath = tempFilePath+"temp/"+productVersion;
+                destTempFile = new File(filePath,fileName);
+        }
+        return destTempFile.exists();
+    }
+
+    @Override
     public Boolean insertFileInfo(FileBO fileBO) {
 
         return fileManagementMapper.insertFileInfo(
@@ -66,7 +88,13 @@ public class FileManagementServiceImpl implements FileManagementService {
                     fileBO.setFilePath(filePath);
                     File destTempFile = new File(filePath,fileBO.getFileName());
                     // 创建文件
-                    createFile(destTempFile,parentFileDir,guid);
+                    Boolean result = createFile(destTempFile,parentFileDir,guid);
+                    if(result==true) {
+                        log.info("文件创建成功，写入数据库");
+
+                        // 录入数据库
+                        insertFileInfo(fileBO);
+                    }
                 }
             } else if(suffix.equals("cfg")) {
                 File parentFileDir = new File(tempFilePath+guid);
@@ -75,15 +103,23 @@ public class FileManagementServiceImpl implements FileManagementService {
                     fileBO.setFilePath(filePath);
                     File destTempFile = new File(filePath,fileBO.getFileName());
                     // 创建文件
-                    createFile(destTempFile,parentFileDir,guid);
-                    log.info("ks-auto.cfg文件创建成功");
-                    
-                    // TODO ks-auto.cfg字符串替换:cdrom ->
-                    String path = filePath+"/"+fileBO.getFileName();
-                    String srcStr = "cdrom";
-                    String replaceStr = "url --url http://210.0.0.233/E0710/H3C_CAS-E0710-centos-x86_64/";
-                    strReplace(path,srcStr,replaceStr);
-                    log.info("ks-auto.cfg文件内容cdrom已替换");
+                    Boolean result = createFile(destTempFile,parentFileDir,guid);
+                    if(result==true) {
+
+                        log.info("ks-auto.cfg文件创建成功");
+
+                        String path = filePath+"/"+fileBO.getFileName();
+                        String srcStr = "cdrom";
+                        String replaceStr = "url --url http://210.0.0.233/E0710/H3C_CAS-E0710-centos-x86_64/";
+                        strReplace(path,srcStr,replaceStr);
+                        log.info("ks-auto.cfg文件内容cdrom已替换");
+
+                        log.info("文件创建成功，写入数据库");
+
+                        // 录入数据库
+                        insertFileInfo(fileBO);
+                    }
+
                 }
             } else {
                 File parentFileDir = new File(tempFilePath+guid);
@@ -92,12 +128,16 @@ public class FileManagementServiceImpl implements FileManagementService {
                     fileBO.setFilePath(filePath);
                     File destTempFile = new File(filePath,fileBO.getFileName());
                     // 创建文件
-                    createFile(destTempFile,parentFileDir,guid);
+                    Boolean result = createFile(destTempFile,parentFileDir,guid);
+                    if(result==true) {
+                        log.info("文件创建成功，写入数据库");
+
+                        // 录入数据库
+                        insertFileInfo(fileBO);
+                    }
                 }
             }
 
-            // 录入数据库
-            insertFileInfo(fileBO);
 
         } catch (Exception e) {
             e.printStackTrace();

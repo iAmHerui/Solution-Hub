@@ -23,4 +23,6 @@ public interface NodesManagementService {
     Boolean addDHCPInfo(String dhcpIPPond, String dhcpMask);
 
     DhcpBO getDHCPInfo();
+
+    Boolean isNodeExist(String nodeName);
 }

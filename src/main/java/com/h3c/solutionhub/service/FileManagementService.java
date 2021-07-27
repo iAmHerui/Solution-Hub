@@ -6,6 +6,8 @@ import java.util.List;
 
 public interface FileManagementService {
 
+    Boolean isFileExist(String fileName,String productVersion);
+
     Boolean insertFileInfo(FileBO fileBO);
 
     Boolean deleteFileInfo(String fileName);
