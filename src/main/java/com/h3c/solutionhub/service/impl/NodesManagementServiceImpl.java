@@ -147,6 +147,7 @@ public class NodesManagementServiceImpl implements NodesManagementService {
             File desFile = new File(desCfgPath);
             try {
                 Files.copy(sourceFile.toPath(),desFile.toPath());
+                log.info("copy ks-auto.cfg success");
             } catch (IOException e) {
                 log.info("copy ks-auto.cfg failure");
                 e.printStackTrace();
@@ -155,6 +156,7 @@ public class NodesManagementServiceImpl implements NodesManagementService {
 
             // 5.2 修改Node 定制文件,替换相关文本
             modifyDesFile(node,desCfgPath,productType);
+            log.info("modify new ks-auto.cfg success");
 
             // 6.生成配置文件 grub.cfg-nodeManageIP16进制
             createGrubConfFile(productType,productVersion,node.getManagementIP(),destFileName);
@@ -478,7 +480,7 @@ public class NodesManagementServiceImpl implements NodesManagementService {
             Enumeration<?> enumeration = NetworkInterface.getNetworkInterfaces();
             while (enumeration.hasMoreElements()) {
                 NetworkInterface ni = (NetworkInterface) enumeration.nextElement();
-                if (!ni.getName().equals("networkName")) {
+                if (!ni.getName().equals(networkName)) {
                     continue;
                 } else {
                     Enumeration<?> e2 = ni.getInetAddresses();
@@ -511,6 +513,10 @@ public class NodesManagementServiceImpl implements NodesManagementService {
 //    }
 
     private void modifyDesFile(NodeBo node,String desFilePath,String productType) {
+        String sourceLine_0 = "cdrom";
+        String desLine_0 = "nfs " +
+                "--server=" + hostIP() + " " +
+                "--dir=/var/nfs/E0710/H3C_CAS-E0710-centos-x86_64/";
         String sourceLine_1 = "network  --bootproto=dhcp --onboot=off --ipv6=auto --no-activate";
         String desLine_1 = "network " +
                 "--device=" + networkName +" " +
@@ -525,6 +531,7 @@ public class NodesManagementServiceImpl implements NodesManagementService {
         String sourceLine_2 = "network  --hostname=cvknode";
         String desLine_2 = "";
 
+        strReplace(desFilePath,sourceLine_0,desLine_0);
         strReplace(desFilePath,sourceLine_1,desLine_1);
         strReplace(desFilePath,sourceLine_2,desLine_2);
 

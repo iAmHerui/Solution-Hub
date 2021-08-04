@@ -86,6 +86,7 @@ public class FileManagementServiceImpl implements FileManagementService {
                 if(parentFileDir.isDirectory()) {
                     String filePath = tempFilePath+"iso/"+fileBO.getProductVersion();
                     fileBO.setFilePath(filePath);
+                    // TODO 检查下这行
                     File destTempFile = new File(filePath,fileBO.getFileName());
                     // 创建文件
                     Boolean result = createFile(destTempFile,parentFileDir,guid);
@@ -106,21 +107,11 @@ public class FileManagementServiceImpl implements FileManagementService {
                     Boolean result = createFile(destTempFile,parentFileDir,guid);
                     log.info("ks-auto.cfg文件创建成功");
                     if(result==true) {
-
-                        log.info("ks-auto.cfg,替换cdrom");
-                        String path = filePath+"/"+fileBO.getFileName();
-                        String srcStr = "cdrom";
-                        String replaceStr = "nfs --server=210.0.0.233 --dir=/var/nfs/E0710/H3C_CAS-E0710-centos-x86_64/";
-
-                        strReplace(path,srcStr,replaceStr);
-                        log.info("ks-auto.cfg文件内容cdrom已替换");
-
                         log.info("文件创建成功，写入数据库");
 
                         // 录入数据库
                         insertFileInfo(fileBO);
                     }
-
                 }
             } else {
                 File parentFileDir = new File(tempFilePath+guid);
