@@ -4,6 +4,7 @@ import org.junit.Test;
 
 import java.io.*;
 import java.net.*;
+import java.nio.file.Files;
 import java.util.Enumeration;
 
 public class FileTest {
@@ -163,6 +164,20 @@ public class FileTest {
         FileWriter out = new FileWriter(file);
         tempStream.writeTo(out);
         out.close();
+    }
+
+    /** 复制文件 **/
+    @Test
+    public void strReplace2() throws Exception {
+
+        String filePath ="D:\\test\\test.txt";
+        File file = new File(filePath);
+
+        String filePath2 ="D:\\test\\testA2.txt";
+        File file2 = new File(filePath2);
+
+        Files.copy(file.toPath(),file2.toPath());
+
     }
 
 }

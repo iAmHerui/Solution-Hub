@@ -37,7 +37,7 @@ public class FileManagementServiceImpl implements FileManagementService {
                 String filePath = tempFilePath+"iso/"+productVersion;
                 destTempFile = new File(filePath,fileName);
         } else if(suffix.equals("cfg")) {
-                String filePath = tempFilePath+"www/html/ks/"+productVersion;
+                String filePath = tempFilePath+"nfs/ks/"+productVersion;
                 destTempFile = new File(filePath,fileName);
         } else {
                 String filePath = tempFilePath+"temp/"+productVersion;
@@ -99,15 +99,15 @@ public class FileManagementServiceImpl implements FileManagementService {
             } else if(suffix.equals("cfg")) {
                 File parentFileDir = new File(tempFilePath+guid);
                 if(parentFileDir.isDirectory()) {
-                    String filePath = tempFilePath+"www/html/ks/"+fileBO.getProductVersion();
+                    String filePath = tempFilePath+"nfs/ks/"+fileBO.getProductVersion();
                     fileBO.setFilePath(filePath);
                     File destTempFile = new File(filePath,fileBO.getFileName());
                     // 创建文件
                     Boolean result = createFile(destTempFile,parentFileDir,guid);
+                    log.info("ks-auto.cfg文件创建成功");
                     if(result==true) {
 
-                        log.info("ks-auto.cfg文件创建成功");
-
+                        log.info("ks-auto.cfg,替换cdrom");
                         String path = filePath+"/"+fileBO.getFileName();
                         String srcStr = "cdrom";
                         String replaceStr = "url --url http://210.0.0.233/E0710/H3C_CAS-E0710-centos-x86_64/";

@@ -10,3 +10,17 @@ public class SolutionhubApplication {
         SpringApplication.run(SolutionhubApplication.class, args);
     }
 }
+
+//@SpringBootApplication
+//public class SolutionhubApplication extends SpringBootServletInitializer {
+//
+//    public static void main(String[] args) {
+//        SpringApplication.run(SolutionhubApplication.class, args);
+//    }
+//
+//    @Override
+//    protected SpringApplicationBuilder configure(SpringApplicationBuilder builder) {
+//        return builder.sources(SolutionhubApplication.class);
+//    }
+//
+//}

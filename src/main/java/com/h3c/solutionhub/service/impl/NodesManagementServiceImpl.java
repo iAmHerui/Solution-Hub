@@ -10,6 +10,7 @@ import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.util.EntityUtils;
+import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +19,7 @@ import org.springframework.stereotype.Service;
 
 import java.io.*;
 import java.net.*;
+import java.nio.file.Files;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
@@ -42,8 +44,8 @@ public class NodesManagementServiceImpl implements NodesManagementService {
     @Value("${grubFilePath}")
     private String grubFilePath;
 
-    @Value("${mountShell}")
-    private String mountShell;
+    @Value("${networkName}")
+    private String networkName;
 
     @Override
     public List<NodeBo> getNodeList() {
@@ -120,12 +122,15 @@ public class NodesManagementServiceImpl implements NodesManagementService {
             String mac = getManageNodeMac(node.getNodeHDMIP(),token);
             log.info("当前nodeName: "+node.getNodeName()+" ,mac: "+mac);
             node.setManagementMAC(mac);
-        }
 
+        }
 
         // 3.生成配置文件dhcpd.conf
         createConfFile(dhcpBO.getDhcpIPPond(),dhcpBO.getDhcpMask(),nodes);
         log.info("dhcpd.conf 文件已生成");
+
+        // 4.执行dhcp restart
+        execDHCPCommand();
 
         // 4.执行mount
         Boolean result = execLinuxCommand(productType, productVersion);
@@ -133,18 +138,36 @@ public class NodesManagementServiceImpl implements NodesManagementService {
 
         for(NodeBo node:nodes) {
 
-            // 5.生成配置文件 grub.cfg-nodeManageIP16进制
-            createGrubConfFile(productType,productVersion,node.getManagementIP());
+            // 5.生成该节点的ks-auto.cfg文件,并进行替换相关文本
+            // 5.1 生成Node ks-auto.cfg定制文件
+            String sourceCfgPath = tempFilePath+"nfs/ks/"+productVersion+"/ks-auto.cfg";
+            String destFileName = "ks-auto-"+to16(node.getManagementIP())+".cfg";
+            String desCfgPath = tempFilePath+"nfs/ks/"+productVersion+"/"+destFileName;
+            File sourceFile = new File(sourceCfgPath);
+            File desFile = new File(desCfgPath);
+            try {
+                Files.copy(sourceFile.toPath(),desFile.toPath());
+            } catch (IOException e) {
+                log.info("copy ks-auto.cfg failure");
+                e.printStackTrace();
+                return false;
+            }
+
+            // 5.2 修改Node 定制文件,替换相关文本
+            modifyDesFile(node,desCfgPath,productType);
+
+            // 6.生成配置文件 grub.cfg-nodeManageIP16进制
+            createGrubConfFile(productType,productVersion,node.getManagementIP(),destFileName);
             log.info("grub.cfg 文件已生成");
 
-            // 6.PXE模式执行
+            // 7.PXE模式执行
             startPXE(node.getNodeHDMIP(),node.getToken());
             log.info("当前nodeName: "+node.getNodeName()+" ,PXE配置下发成功");
 
             // 修改节点状态
             nodesManagementMapper.updateNodeStatus(node.getNodeId());
 
-            // 7.重启
+            // 8.重启
             reboot(node.getNodeHDMIP(),node.getToken());
             log.info("当前nodeName: "+node.getNodeName()+" ,已强制重启");
         }
@@ -286,10 +309,14 @@ public class NodesManagementServiceImpl implements NodesManagementService {
         createFileForDHCPConf(confInfo,filePath);
     }
 
+    private Boolean createNodeKsCfg() {
+        return true;
+    }
+
     /**
      * 生成配置文件grub.cfg
      */
-    private void createGrubConfFile(String productType, String productVersion,String nodeManageIp) {
+    private void createGrubConfFile(String productType, String productVersion,String nodeManageIp,String desFileName) {
 
         //获取文件名，不要后缀
         String isoName = fileManagementMapper.getISOName(productType,productVersion);
@@ -318,8 +345,8 @@ public class NodesManagementServiceImpl implements NodesManagementService {
                         "\n"+
                         "menuentry 'Install CAS-x86_64' --class fedora --class gnu-linux --class gnu --class os {\n"+
                         "       linuxefi /images/pxeboot/vmlinuz "+
-                        "inst.stage2=http://"+hostIP()+"/"+productVersion+"/"+prefixName+"/"+" "+
-                        "inst.ks=http://"+hostIP()+"/ks/"+productVersion+"/ks-auto.cfg"+" "+
+                        "inst.stage2=nfs:"+hostIP()+"/var/nfs/"+productVersion+"/"+prefixName+" "+
+                        "inst.ks=nfs:"+hostIP()+"/var/nfs/ks/"+productVersion+"/"+desFileName+" "+
                         "net.ifnames=0 "+
                         "biosdevname=0 "+
                         "quiet\n"+
@@ -368,19 +395,43 @@ public class NodesManagementServiceImpl implements NodesManagementService {
         }
     }
 
+    private Boolean execDHCPCommand() {
+
+        // 执行mount shell
+        String command = "systemctl restart dhcpd";
+        log.info("DHCP command: "+command);
+
+        Runtime run = Runtime.getRuntime();
+        Process process = null;
+
+        try {
+            process = run.exec(command);
+            process.waitFor();
+            process.destroy();
+            log.info("DHCP restart SUCCESS");
+            return true;
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        log.info("DHCP restart FAILURE");
+        return false;
+    }
+
     private Boolean execLinuxCommand(String productType, String productVersion) {
 
         String isoName = fileManagementMapper.getISOName(productType,productVersion);
         String prefixName = isoName.substring(0,isoName.lastIndexOf("."));
         //创建 /var/www/html/version/iso名字前缀/ 目录
-        String filePath = "/var/www/html/"+productVersion+"/"+prefixName;
+        String filePath = "/var/nfs/"+productVersion+"/"+prefixName;
         File file = new File(filePath);
         if (!file.exists()) {
             file.mkdirs();
         }
 
         // 执行mount shell
-        String command = "mount -t auto /var/iso/"+productVersion+"/"+isoName+" /var/www/html/"+productVersion+"/"+prefixName;
+        String command = "mount -t auto /var/iso/"+productVersion+"/"+isoName+" /var/nfs/"+productVersion+"/"+prefixName;
         log.info("mount command: "+command);
 
         Runtime run = Runtime.getRuntime();
@@ -427,7 +478,7 @@ public class NodesManagementServiceImpl implements NodesManagementService {
             Enumeration<?> enumeration = NetworkInterface.getNetworkInterfaces();
             while (enumeration.hasMoreElements()) {
                 NetworkInterface ni = (NetworkInterface) enumeration.nextElement();
-                if (!ni.getName().equals("eno1")) {
+                if (!ni.getName().equals("networkName")) {
                     continue;
                 } else {
                     Enumeration<?> e2 = ni.getInetAddresses();
@@ -444,8 +495,82 @@ public class NodesManagementServiceImpl implements NodesManagementService {
             e.printStackTrace();
 //                System.exit(-1);
         }
-        log.info("当前 IP 所属网卡 eno1");
+        log.info("当前 IP 所属网卡: "+networkName);
         return ip;
+    }
+
+//    @Test
+//    public void test() {
+//        NodeBo nodeBo = new NodeBo();
+//        nodeBo.setManagementIP("1.1.1.1");
+//        nodeBo.setManagementGateway("1.1.1.0");
+//        nodeBo.setManagementMask("255.255.255.0");
+//        nodeBo.setNodeName("node_test");
+//
+//        modifyDesFile(nodeBo,"D:\\test\\ks-auto2.cfg","CAS_CVK");
+//    }
+
+    private void modifyDesFile(NodeBo node,String desFilePath,String productType) {
+        String sourceLine_1 = "network  --bootproto=dhcp --onboot=off --ipv6=auto --no-activate";
+        String desLine_1 = "network " +
+                "--device=" + networkName +" " +
+                "--bootproto=static " +
+                "--ip=" + node.getManagementIP() +" " +
+                "--netmask=" + node.getManagementMask() +" " +
+                "--gateway=" + node.getManagementGateway() +" " +
+                "--onboot=yes " +
+                "--hostname=" + node.getNodeName();
+        String sourceLine_2 = "network  --hostname=cvknode";
+        String desLine_2 = "";
+
+        strReplace(desFilePath,sourceLine_1,desLine_1);
+        strReplace(desFilePath,sourceLine_2,desLine_2);
+
+        // 如果是CVM,不需要改动。如果是CVK,则需要改动
+        if(productType.equals("CAS_CVK")) {
+            String sourceLine_3 = "virtualization-host-environment-cvm";
+            String desLine_3 = "virtualization-host-environment";
+            strReplace(desFilePath,sourceLine_3,desLine_3);
+        }
+        log.info("ks-auto.cfg modify success!");
+    }
+
+    private void strReplace(String path,String srcStr,String replaceStr) {
+        File file = new File(path);
+        BufferedReader bufIn = null;
+        FileWriter out = null;
+        try {
+            FileReader in = new FileReader(file);
+            bufIn = new BufferedReader(in);
+            // 内存流, 作为临时流
+            CharArrayWriter tempStream = new CharArrayWriter();
+            // 替换
+            String line = null;
+            while ((line = bufIn.readLine()) != null) {
+                // 替换每行中, 符合条件的字符串
+                line = line.replaceAll(srcStr, replaceStr);
+                // 将该行写入内存
+                tempStream.write(line);
+                // 添加操作系统对应的换行符
+                tempStream.append(System.getProperty("line.separator"));
+            }
+
+            // 将内存中的流 写入 文件
+            out = new FileWriter(file);
+            tempStream.writeTo(out);
+
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                bufIn.close();
+                out.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
 }
