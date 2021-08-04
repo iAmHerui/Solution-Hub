@@ -516,8 +516,10 @@ public class NodesManagementServiceImpl implements NodesManagementService {
                 "--device=" + networkName +" " +
                 "--bootproto=static " +
                 "--ip=" + node.getManagementIP() +" " +
-                "--netmask=" + node.getManagementMask() +" " +
-                "--gateway=" + node.getManagementGateway() +" " +
+                "--netmask=255.255.224.0" +" " +
+                "--gateway=210.0.0.254" +" " +
+//                "--netmask=" + node.getManagementMask() +" " +
+//                "--gateway=" + node.getManagementGateway() +" " +
                 "--onboot=yes " +
                 "--hostname=" + node.getNodeName();
         String sourceLine_2 = "network  --hostname=cvknode";

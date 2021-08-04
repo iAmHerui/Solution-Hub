@@ -104,6 +104,10 @@ public class NodesManagementController {
             node.setNodeHDMIP(nodeBo.getString("nodeHDMIP"));
             node.setManagementIP(nodeBo.getString("managementIP"));
             node.setNodeName(nodeBo.getString("nodeName"));
+
+            node.setManagementMask("managementMask");
+            node.setManagementGateway("managementGateway");
+
             nodes.add(node);
         }
         Boolean result = nodesManagementService.deployNode(productType,productVersion,nodes);

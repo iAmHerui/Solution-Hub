@@ -110,7 +110,8 @@ public class FileManagementServiceImpl implements FileManagementService {
                         log.info("ks-auto.cfg,替换cdrom");
                         String path = filePath+"/"+fileBO.getFileName();
                         String srcStr = "cdrom";
-                        String replaceStr = "url --url http://210.0.0.233/E0710/H3C_CAS-E0710-centos-x86_64/";
+                        String replaceStr = "nfs --server=210.0.0.233 --dir=/var/nfs/E0710/H3C_CAS-E0710-centos-x86_64/";
+
                         strReplace(path,srcStr,replaceStr);
                         log.info("ks-auto.cfg文件内容cdrom已替换");
 
