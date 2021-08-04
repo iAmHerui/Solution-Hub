@@ -180,4 +180,18 @@ public class FileTest {
 
     }
 
+    @Test
+    public void testFile() throws Exception {
+        File file = new File("D:\\test\\test1.txt");
+        System.out.println(file.exists());
+        System.out.println(file.isDirectory());
+
+        File file1 = new File("D:\\test");
+        System.out.println(file1.exists());
+        System.out.println(file1.isDirectory());
+
+        File file2 = new File("D:\\test","test1.txt");
+        System.out.println(file2.exists());
+    }
+
 }

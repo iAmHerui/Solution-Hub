@@ -146,6 +146,7 @@ public class NodesManagementServiceImpl implements NodesManagementService {
             File sourceFile = new File(sourceCfgPath);
             File desFile = new File(desCfgPath);
             try {
+                // TODO是否需要判断desFile已存在？
                 Files.copy(sourceFile.toPath(),desFile.toPath());
                 log.info("copy ks-auto.cfg success");
             } catch (IOException e) {
@@ -516,7 +517,7 @@ public class NodesManagementServiceImpl implements NodesManagementService {
         String sourceLine_0 = "cdrom";
         String desLine_0 = "nfs " +
                 "--server=" + hostIP() + " " +
-                "--dir=/var/nfs/E0710/H3C_CAS-E0710-centos-x86_64/";
+                "--dir=/var/nfs/" + productType + "/H3C_CAS-E0710-centos-x86_64/";
         String sourceLine_1 = "network  --bootproto=dhcp --onboot=off --ipv6=auto --no-activate";
         String desLine_1 = "network " +
                 "--device=" + networkName +" " +
