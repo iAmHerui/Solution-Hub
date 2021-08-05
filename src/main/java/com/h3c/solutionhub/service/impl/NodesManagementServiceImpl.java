@@ -133,8 +133,12 @@ public class NodesManagementServiceImpl implements NodesManagementService {
         execDHCPCommand();
 
         // 4.执行mount
-        Boolean result = execLinuxCommand(productType, productVersion);
-        log.info("mount 执行 "+result);
+        String srcDir = execLinuxCommand(productType, productVersion);
+        log.info("mount 已执行,mount dir = "+srcDir);
+
+        // 5.将mount后的文件，拷贝到临时目录
+        copy(srcDir,"/var/nfs/mountCopy");
+        log.info(srcDir+" 目录下所有文件,已拷贝到 "+"/var/nfs/mountCopy");
 
         for(NodeBo node:nodes) {
 
@@ -348,8 +352,8 @@ public class NodesManagementServiceImpl implements NodesManagementService {
                         "\n"+
                         "menuentry 'Install CAS-x86_64' --class fedora --class gnu-linux --class gnu --class os {\n"+
                         "       linuxefi /images/pxeboot/vmlinuz "+
-                        "inst.stage2=nfs:"+hostIP()+"/var/nfs/"+productVersion+"/"+prefixName+" "+
-                        "inst.ks=nfs:"+hostIP()+"/var/nfs/ks/"+productVersion+"/"+desFileName+" "+
+                        "inst.stage2=nfs:"+hostIP()+":/var/nfs/"+productVersion+"/"+prefixName+" "+
+                        "inst.ks=nfs:"+hostIP()+":/var/nfs/ks/"+productVersion+"/"+desFileName+" "+
                         "net.ifnames=0 "+
                         "biosdevname=0 "+
                         "quiet\n"+
@@ -422,7 +426,7 @@ public class NodesManagementServiceImpl implements NodesManagementService {
         return false;
     }
 
-    private Boolean execLinuxCommand(String productType, String productVersion) {
+    private String execLinuxCommand(String productType, String productVersion) {
 
         String isoName = fileManagementMapper.getISOName(productType,productVersion);
         String prefixName = isoName.substring(0,isoName.lastIndexOf("."));
@@ -444,13 +448,13 @@ public class NodesManagementServiceImpl implements NodesManagementService {
             process = run.exec(command);
             process.waitFor();
             process.destroy();
-            return true;
+            return "/var/nfs/"+productVersion+"/"+prefixName;
         } catch (IOException e) {
             e.printStackTrace();
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        return false;
+        return "";
     }
 
     private String to16(String ipString) {
@@ -515,18 +519,19 @@ public class NodesManagementServiceImpl implements NodesManagementService {
 
     private void modifyDesFile(NodeBo node,String desFilePath,String productType) {
         String sourceLine_0 = "cdrom";
-        String desLine_0 = "nfs " +
-                "--server=" + hostIP() + " " +
-                "--dir=/var/nfs/" + productType + "/H3C_CAS-E0710-centos-x86_64/";
+//        String desLine_0 = "nfs " +
+//                "--server=" + hostIP() + " " +
+//                "--dir=/var/nfs/" + productType + "/H3C_CAS-E0710-centos-x86_64/";
+        String desLine_0 = "";
         String sourceLine_1 = "network  --bootproto=dhcp --onboot=off --ipv6=auto --no-activate";
         String desLine_1 = "network " +
                 "--device=" + networkName +" " +
                 "--bootproto=static " +
                 "--ip=" + node.getManagementIP() +" " +
-                "--netmask=255.255.224.0" +" " +
-                "--gateway=210.0.0.254" +" " +
-//                "--netmask=" + node.getManagementMask() +" " +
-//                "--gateway=" + node.getManagementGateway() +" " +
+//                "--netmask=255.255.224.0" +" " +
+//                "--gateway=210.0.0.254" +" " +
+                "--netmask=" + node.getManagementMask() +" " +
+                "--gateway=" + node.getManagementGateway() +" " +
                 "--onboot=yes " +
                 "--hostname=" + node.getNodeName();
         String sourceLine_2 = "network  --hostname=cvknode";
@@ -583,4 +588,51 @@ public class NodesManagementServiceImpl implements NodesManagementService {
         }
     }
 
+    private static void copy(String src, String des) {
+        File file1=new File(src);
+        File[] fs=file1.listFiles();
+        File file2=new File(des);
+        if(!file2.exists()){
+            file2.mkdirs();
+        }
+        for (File f : fs) {
+            if(f.isFile()){
+                fileCopy(f.getPath(),des+"\\"+f.getName()); //调用文件拷贝的方法
+            }else if(f.isDirectory()){
+                copy(f.getPath(),des+"\\"+f.getName());
+            }
+        }
+
+    }
+
+    /**
+     * 文件拷贝的方法
+     */
+    private static void fileCopy(String src, String des) {
+
+        BufferedReader br=null;
+        PrintStream ps=null;
+
+        try {
+            br=new BufferedReader(new InputStreamReader(new FileInputStream(src)));
+            ps=new PrintStream(new FileOutputStream(des));
+            String s=null;
+            while((s=br.readLine())!=null){
+                ps.println(s);
+                ps.flush();
+            }
+
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }finally{
+            try {
+                if(br!=null)  br.close();
+                if(ps!=null)  ps.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
 }

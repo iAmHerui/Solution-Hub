@@ -194,4 +194,81 @@ public class FileTest {
         System.out.println(file2.exists());
     }
 
+    private void FileTest(File dir) throws Exception {
+        if (!dir.exists() || !dir.isDirectory()) {// 判断是否存在目录
+            return;
+        }
+        String[] files = dir.list();// 读取目录下的所有目录文件信息
+        for (int i = 0; i < files.length; i++) {// 循环，添加文件名或回调自身
+            File file = new File(dir, files[i]);
+            if (file.isFile()) {// 如果文件
+                System.out.println(dir + "\\" + file.getName());
+//                fileNames.add(dir + "\\" + file.getName());// 添加文件全路径名
+            } else {// 如果是目录
+                FileTest(file);
+            }
+        }
+    }
+
+    @Test
+    public void FileTest1() throws Exception {
+        String dirString = "D:\\test";
+        File dir = new File(dirString);
+        FileTest(dir);
+    }
+
+    @Test
+    public void CopyDir() {
+        copy("D:\\test","D:\\test_copy");
+        System.out.println("文件拷贝完成!");
+    }
+
+    private static void copy(String src, String des) {
+        File file1=new File(src);
+        File[] fs=file1.listFiles();
+        File file2=new File(des);
+        if(!file2.exists()){
+            file2.mkdirs();
+        }
+        for (File f : fs) {
+            if(f.isFile()){
+                fileCopy(f.getPath(),des+"\\"+f.getName()); //调用文件拷贝的方法
+            }else if(f.isDirectory()){
+                copy(f.getPath(),des+"\\"+f.getName());
+            }
+        }
+
+    }
+
+    /**
+     * 文件拷贝的方法
+     */
+    private static void fileCopy(String src, String des) {
+
+        BufferedReader br=null;
+        PrintStream ps=null;
+
+        try {
+            br=new BufferedReader(new InputStreamReader(new FileInputStream(src)));
+            ps=new PrintStream(new FileOutputStream(des));
+            String s=null;
+            while((s=br.readLine())!=null){
+                ps.println(s);
+                ps.flush();
+            }
+
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }finally{
+            try {
+                if(br!=null)  br.close();
+                if(ps!=null)  ps.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
 }
