@@ -139,8 +139,11 @@ public class NodesManagementServiceImpl implements NodesManagementService {
         log.info("mount 已执行,mount dir = "+srcDir);
 
         // 5.将mount后的文件，拷贝到临时目录
-        copy(srcDir,"/var/nfs/mountCopy");
-        log.info(srcDir+" 目录下所有文件,已拷贝到 "+"/var/nfs/mountCopy");
+//        copy(srcDir,"/var/nfs/mountCopy");
+        String copyCommand = "cp -r "+srcDir+" "+"/var/nfs/mountCopy";
+        log.info("copyCommand: "+copyCommand);
+        Boolean result = execLinuxCommand(copyCommand);
+        log.info(srcDir+" 目录下所有文件,已拷贝到 "+"/var/nfs/mountCopy "+result);
 
         for(NodeBo node:nodes) {
 
@@ -599,9 +602,9 @@ public class NodesManagementServiceImpl implements NodesManagementService {
         }
         for (File f : fs) {
             if(f.isFile()){
-                fileCopy(f.getPath(),des+"\\"+f.getName()); //调用文件拷贝的方法
+                fileCopy(f.getPath(),des+"/"+f.getName()); //调用文件拷贝的方法
             }else if(f.isDirectory()){
-                copy(f.getPath(),des+"\\"+f.getName());
+                copy(f.getPath(),des+"/"+f.getName());
             }
         }
 
@@ -636,5 +639,25 @@ public class NodesManagementServiceImpl implements NodesManagementService {
                 e.printStackTrace();
             }
         }
+    }
+
+    private Boolean execLinuxCommand(String command) {
+
+        log.info("mount command: "+command);
+
+        Runtime run = Runtime.getRuntime();
+        Process process = null;
+
+        try {
+            process = run.exec(command);
+            process.waitFor();
+            process.destroy();
+            return true;
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        return false;
     }
 }
