@@ -105,8 +105,8 @@ public class NodesManagementController {
             node.setManagementIP(nodeBo.getString("managementIP"));
             node.setNodeName(nodeBo.getString("nodeName"));
 
-            node.setManagementMask("managementMask");
-            node.setManagementGateway("managementGateway");
+            node.setManagementMask(nodeBo.getString("managementMask"));
+            node.setManagementGateway(nodeBo.getString("managementGateway"));
 
             nodes.add(node);
         }

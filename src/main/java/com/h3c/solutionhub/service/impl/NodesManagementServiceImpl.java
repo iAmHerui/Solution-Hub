@@ -10,7 +10,6 @@ import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.util.EntityUtils;
-import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,7 +17,10 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.io.*;
-import java.net.*;
+import java.net.Inet6Address;
+import java.net.InetAddress;
+import java.net.NetworkInterface;
+import java.net.SocketException;
 import java.nio.file.Files;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -545,7 +547,7 @@ public class NodesManagementServiceImpl implements NodesManagementService {
         if(productType.equals("CAS_CVK")) {
             String sourceLine_3 = "virtualization-host-environment-cvm";
             String desLine_3 = "virtualization-host-environment";
-            strReplace(desFilePath,sourceLine_3,desLine_3);
+//            strReplace(desFilePath,sourceLine_3,desLine_3);
         }
         log.info("ks-auto.cfg modify success!");
     }
