@@ -546,13 +546,13 @@ public class NodesManagementServiceImpl implements NodesManagementService {
         strReplace(desFilePath,sourceLine_1,desLine_1);
         strReplace(desFilePath,sourceLine_2,desLine_2);
 
-        // 如果是CVM,不需要改动。如果是CVK,则需要改动
-        if(productType.equals("CAS_CVK")) {
-            String sourceLine_3 = "virtualization-host-environment-cvm";
-            String desLine_3 = "virtualization-host-environment-cvm\n"+"@^virtualization-host-environment";
-            strReplace(desFilePath,sourceLine_3,desLine_3);
-        }
-        log.info("ks-auto.cfg modify success!");
+        // 如果是CVM,不需要改动。如果是CVK,则需要改动 TODO 一期默认部署CVM
+//        if(productType.equals("CAS_CVK")) {
+//            String sourceLine_3 = "virtualization-host-environment-cvm";
+//            String desLine_3 = "virtualization-host-environment";
+//            strReplace(desFilePath,sourceLine_3,desLine_3);
+//        }
+//        log.info("ks-auto.cfg modify success!");
     }
 
     private void strReplace(String path,String srcStr,String replaceStr) {
