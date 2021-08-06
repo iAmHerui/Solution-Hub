@@ -530,7 +530,7 @@ public class NodesManagementServiceImpl implements NodesManagementService {
         String desLine_0 = "";
         String sourceLine_1 = "network  --bootproto=dhcp --onboot=off --ipv6=auto --no-activate";
         String desLine_1 = "network " +
-                "--device=" + networkName +" " +
+                "--device=eth0" +" " +
                 "--bootproto=static " +
                 "--ip=" + node.getManagementIP() +" " +
 //                "--netmask=255.255.224.0" +" " +
