@@ -8,6 +8,8 @@ public interface FileManagementService {
 
     Boolean isFileExist(String fileName,String productVersion);
 
+    List<FileBO> getFileList();
+
     Boolean insertFileInfo(FileBO fileBO);
 
     Boolean deleteFileInfo(String fileName);

@@ -101,6 +101,13 @@ public class FileManagementController {
         }
     }
 
+    @ApiOperation(value = "文件列表",notes = "获取文件列表")
+    @CrossOrigin(origins ="*",maxAge =3600)
+    @GetMapping(value = "/fileInfo")
+    public List<FileBO> fileInfo() {
+        return fileManagementService.getFileList();
+    }
+
     @ApiOperation(value = "文件删除",notes = "文件删除")
     @CrossOrigin(origins ="*",maxAge =3600)
     @PostMapping(value = "/fileDelete")

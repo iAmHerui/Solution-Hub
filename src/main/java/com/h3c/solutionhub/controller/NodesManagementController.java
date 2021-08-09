@@ -7,8 +7,7 @@ import com.h3c.solutionhub.entity.NodeBo;
 import com.h3c.solutionhub.service.NodesManagementService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -18,14 +17,14 @@ import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
+@Slf4j
 @Api(value = "节点管理",tags = "节点管理")
 @RestController
 @CrossOrigin
 @RequestMapping(value = "/nodesManagement")
 public class NodesManagementController {
-
-    private static final Logger log = LoggerFactory.getLogger(NodesManagementController.class);
 
     @Autowired
     NodesManagementService nodesManagementService;
@@ -196,5 +195,22 @@ public class NodesManagementController {
         }
         return ip4.getHostAddress();
     }
+
+    @ApiOperation(value = "节点部署Test",notes = "节点部署Test")
+    @GetMapping(value = "/nodeDeployTest")
+    public Boolean nodeDeployTest() {
+        log.info("Current Thread : {}",Thread.currentThread().getName());
+        log.info("开始节点部署");
+        try {
+            TimeUnit.SECONDS.sleep(7);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+            return false;
+        }
+        log.info("开始节点完成");
+        return true;
+    }
+
+
 
 }

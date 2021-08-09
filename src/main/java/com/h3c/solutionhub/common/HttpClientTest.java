@@ -38,7 +38,7 @@ public class HttpClientTest {
 
     @Test
     public void HttpsPatch() {
-        HttpClientUtil httpClientUtil = new HttpClientUtil();
+        HttpsClientUtil httpClientUtil = new HttpsClientUtil();
 
         String url = "https://210.0.12.23/redfish/v1/Systems/1";
 
@@ -57,7 +57,7 @@ public class HttpClientTest {
 
     @Test
     public void HttpsPost() {
-        HttpClientUtil httpClientUtil = new HttpClientUtil();
+        HttpsClientUtil httpClientUtil = new HttpsClientUtil();
 
         String url = "https://210.0.12.23/redfish/v1/SessionService/Sessions";
 
@@ -70,11 +70,11 @@ public class HttpClientTest {
 
     @Test
     public void HttpsGet() {
-        HttpClientUtil httpClientUtil = new HttpClientUtil();
+        HttpsClientUtil httpClientUtil = new HttpsClientUtil();
 
         String url = "https://210.0.12.23/redfish/v1/Chassis/1/NetworkAdapters/mLOM/NetworkPorts/1";
 
-        HttpResponse response = new HttpClientUtil().sendHttpsGet(url,null,"0ny1TUTv3IdP/mImBuOzx+T6IQYSEzrUcibAl5GW4zg=");
+        HttpResponse response = new HttpsClientUtil().sendHttpsGet(url,null,"0ny1TUTv3IdP/mImBuOzx+T6IQYSEzrUcibAl5GW4zg=");
 
         HttpEntity httpEntity = response.getEntity();
         NodeBo nodeBo = new NodeBo();
@@ -98,7 +98,7 @@ public class HttpClientTest {
         HashMap<String, Object> map = new HashMap<>();
         map.put("ResetType","ForceRestart");
 
-        HttpResponse response = new HttpClientUtil().sendHttpsPost(url,map,"Lnee7pxOb6YF/UdDzcraI46XgocPeb8+JzRs8XTadq0=");
+        HttpResponse response = new HttpsClientUtil().sendHttpsPost(url,map,"Lnee7pxOb6YF/UdDzcraI46XgocPeb8+JzRs8XTadq0=");
         System.out.println("reboot 响应状态为:" + response.getStatusLine());
     }
 }

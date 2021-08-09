@@ -1,5 +1,6 @@
 package com.h3c.solutionhub.mapper;
 
+import com.h3c.solutionhub.entity.FileBO;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
@@ -7,6 +8,8 @@ import java.util.List;
 
 @Mapper
 public interface FileManagementMapper {
+
+    List<FileBO> getFileList();
 
     Boolean insertFileInfo(@Param("fileType") String fileType,
                            @Param("productType") String productType,

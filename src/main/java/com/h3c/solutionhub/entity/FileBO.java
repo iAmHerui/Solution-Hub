@@ -5,6 +5,9 @@ import lombok.Data;
 @Data
 public class FileBO {
 
+    // 文件ID
+    private int fileId;
+
     // 文件类型
     private String fileType;
 

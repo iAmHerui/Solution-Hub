@@ -1,6 +1,6 @@
 package com.h3c.solutionhub.service.impl;
 
-import com.h3c.solutionhub.common.HttpClientUtil;
+import com.h3c.solutionhub.common.HttpsClientUtil;
 import com.h3c.solutionhub.entity.DhcpBO;
 import com.h3c.solutionhub.entity.NodeBo;
 import com.h3c.solutionhub.mapper.FileManagementMapper;
@@ -221,7 +221,7 @@ public class NodesManagementServiceImpl implements NodesManagementService {
         map.put("UserName","admin");
         map.put("Password","Password@_");
 
-        HttpResponse response = new HttpClientUtil().sendHttpsPost(url,map,"");
+        HttpResponse response = new HttpsClientUtil().sendHttpsPost(url,map,"");
         if(response!=null) {
             log.info("响应状态为:" + response.getStatusLine());
             Header[] headers = response.getAllHeaders();
@@ -240,7 +240,7 @@ public class NodesManagementServiceImpl implements NodesManagementService {
         String url = "https://"+nodeMangeIP+"/redfish/v1/Chassis/1/NetworkAdapters/mLOM/NetworkPorts/1";
 
 //        ResponseEntity responseEntity =restTemplateTool.sendHttps(url,null, HttpMethod.GET,token);
-        HttpResponse response = new HttpClientUtil().sendHttpsGet(url,null,token);
+        HttpResponse response = new HttpsClientUtil().sendHttpsGet(url,null,token);
 
         HttpEntity httpEntity = response.getEntity();
 
@@ -270,7 +270,7 @@ public class NodesManagementServiceImpl implements NodesManagementService {
 
         map.put("Boot",childMap);
 
-        HttpResponse response = new HttpClientUtil().sendHttpsPatch2(url,map,token);
+        HttpResponse response = new HttpsClientUtil().sendHttpsPatch2(url,map,token);
         System.out.println("reboot 响应状态为:" + response.getStatusLine());
     }
 
@@ -280,7 +280,7 @@ public class NodesManagementServiceImpl implements NodesManagementService {
         HashMap<String, Object> map = new HashMap<>();
         map.put("ResetType","ForceRestart");
 
-        HttpResponse response = new HttpClientUtil().sendHttpsPost(url,map,token);
+        HttpResponse response = new HttpsClientUtil().sendHttpsPost(url,map,token);
         System.out.println("reboot 响应状态为:" + response.getStatusLine());
 
 //        restTemplateTool.sendHttps(url,map,HttpMethod.PATCH,token);

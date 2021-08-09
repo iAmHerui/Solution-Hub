@@ -47,6 +47,11 @@ public class FileManagementServiceImpl implements FileManagementService {
     }
 
     @Override
+    public List<FileBO> getFileList() {
+        return fileManagementMapper.getFileList();
+    }
+
+    @Override
     public Boolean insertFileInfo(FileBO fileBO) {
 
         return fileManagementMapper.insertFileInfo(

@@ -2,6 +2,18 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.h3c.solutionhub.mapper.FileManagementMapper">
 
+    <select id="getFileList" resultType="com.h3c.solutionhub.entity.FileBO">
+        SELECT
+            id as fileId,
+            file_name as fileName,
+            file_type as fileType,
+            product_type as productType,
+            product_version as productVersion,
+            file_size as fileSize,
+            file_path as filePath
+        FROM file_management
+    </select>
+
     <insert id="insertFileInfo" >
         INSERT INTO  file_management (
             file_type,
@@ -23,7 +35,7 @@
     <delete id="deleteFileInfo">
         DELETE FROM file_management WHERE name = #{fileName,jdbcType=VARCHAR}
     </delete>
-    
+
     <select id="selectFilePath" resultType="string">
         SELECT file_path
         FROM file_management
