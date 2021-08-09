@@ -11,6 +11,7 @@ import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.util.EntityUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
@@ -23,7 +24,7 @@ public class HttpClientUtil {
 
     public static DefaultHttpClient client;
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws Exception{
         // H3C CAS CVM 虚拟化管理平台访问URL
         String strCVMURL = "http://210.0.12.25:8080/cas";
 
@@ -34,6 +35,9 @@ public class HttpClientUtil {
         String strToken = GetSSOToken(strCVMURL + strAuthURL);
 
         log.info(strToken);
+
+        /* 获取所有主机列表 */
+        getHost("http://210.0.12.25:8080/cas/casrs/host/");
     }
 
     private static DefaultHttpClient newInstance() {
@@ -72,5 +76,15 @@ public class HttpClientUtil {
             e.printStackTrace();
         }
         return strToken;
+    }
+
+    // 获取所有主机列表
+    public static void getHost(String url) throws Exception {
+        DefaultHttpClient client = newInstance();
+        HttpGet get = new HttpGet(url);
+        get.addHeader("accept","application/xml");
+        HttpResponse response = client.execute(get);
+        System.out.println(response.getStatusLine());
+        System.out.println(EntityUtils.toString(response.getEntity()));
     }
 }
