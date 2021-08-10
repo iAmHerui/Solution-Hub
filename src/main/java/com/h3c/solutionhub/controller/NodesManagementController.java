@@ -17,7 +17,6 @@ import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 
 @Slf4j
 @Api(value = "节点管理",tags = "节点管理")
@@ -196,21 +195,25 @@ public class NodesManagementController {
         return ip4.getHostAddress();
     }
 
+//    @ApiOperation(value = "节点部署Test",notes = "节点部署Test")
+//    @GetMapping(value = "/nodeDeployTest")
+//    public Boolean nodeDeployTest() {
+//        log.info("Current Thread : {}",Thread.currentThread().getName());
+//        log.info("开始节点部署");
+//        try {
+//            TimeUnit.SECONDS.sleep(7);
+//        } catch (InterruptedException e) {
+//            e.printStackTrace();
+//            return false;
+//        }
+//        log.info("开始节点完成");
+//        return true;
+//    }
+
     @ApiOperation(value = "节点部署Test",notes = "节点部署Test")
     @GetMapping(value = "/nodeDeployTest")
     public Boolean nodeDeployTest() {
-        log.info("Current Thread : {}",Thread.currentThread().getName());
-        log.info("开始节点部署");
-        try {
-            TimeUnit.SECONDS.sleep(7);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-            return false;
-        }
-        log.info("开始节点完成");
-        return true;
+        return nodesManagementService.testAsyn();
     }
-
-
 
 }

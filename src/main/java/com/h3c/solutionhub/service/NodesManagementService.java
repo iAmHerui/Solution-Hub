@@ -25,4 +25,6 @@ public interface NodesManagementService {
     DhcpBO getDHCPInfo();
 
     Boolean isNodeExist(String nodeName);
+
+    Boolean testAsyn();
 }

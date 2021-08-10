@@ -1,5 +1,6 @@
 package com.h3c.solutionhub.service.impl;
 
+import com.h3c.solutionhub.common.AsyncUtil;
 import com.h3c.solutionhub.common.HttpsClientUtil;
 import com.h3c.solutionhub.entity.DhcpBO;
 import com.h3c.solutionhub.entity.NodeBo;
@@ -25,6 +26,7 @@ import java.nio.file.Files;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 @Service
 public class NodesManagementServiceImpl implements NodesManagementService {
@@ -36,6 +38,9 @@ public class NodesManagementServiceImpl implements NodesManagementService {
 
     @Autowired
     private FileManagementMapper fileManagementMapper;
+
+    @Autowired
+    private AsyncUtil asyncUtil;
 
     @Value("${tempFilePath}")
     private String tempFilePath;
@@ -211,6 +216,23 @@ public class NodesManagementServiceImpl implements NodesManagementService {
         } else {
             return true;
         }
+    }
+
+    @Override
+    public Boolean testAsyn() {
+        try {
+            log.info("Current Thread : {}",Thread.currentThread().getName());
+
+            log.info("deploy CVM");
+            TimeUnit.SECONDS.sleep(5);
+            log.info("deploy CVK");
+            TimeUnit.SECONDS.sleep(5);
+            asyncUtil.asyncDeployCluster();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+        return true;
     }
 
 
