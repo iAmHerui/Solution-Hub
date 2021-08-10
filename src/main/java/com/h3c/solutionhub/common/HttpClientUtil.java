@@ -49,13 +49,14 @@ public class HttpClientUtil {
 
             String name = "hostPool_test";
 
-            addHostPool(name);
+//            addHostPool(name);
             Long hostPoolId = getHostPoolIdByName(name);
-            addCluster(hostPoolId,"cluster_test");
+//            System.out.println(hostPoolId);
+//            addCluster(hostPoolId,"cluster_test");
 
             Long clusterId = getClusterIdByName("cluster_test");
-            addHost("root","Password@_",hostPoolId,clusterId,"1.1.1.1");
-
+            addHost("root","Sys@1234",hostPoolId,clusterId,"210.0.12.25");
+            System.out.println(clusterId);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -66,7 +67,7 @@ public class HttpClientUtil {
             client = new DefaultHttpClient();
             client.getCredentialsProvider().setCredentials(
                     new AuthScope("210.0.12.25",8080,"VMC RESTful Web Services"),
-                    new UsernamePasswordCredentials("admin","Sys@1234")
+                    new UsernamePasswordCredentials("admin","Cloud@1234")
             );
         }
         return client;
@@ -116,7 +117,7 @@ public class HttpClientUtil {
         HttpPost post = new HttpPost(url);
         HttpResponse response = client.execute(post);
         System.out.println(response.getStatusLine());
-        System.out.println(EntityUtils.toString(response.getEntity()));
+//        System.out.println(EntityUtils.toString(response.getEntity()));
         return true;
     }
 
@@ -125,6 +126,7 @@ public class HttpClientUtil {
         String url = "http://210.0.12.25:8080/cas/casrs/hostpool/all";
         DefaultHttpClient client = newInstance();
         HttpGet get = new HttpGet(url);
+        get.addHeader("accept","application/xml");
         HttpResponse response = client.execute(get);
         System.out.println(response.getStatusLine());
 
@@ -138,15 +140,15 @@ public class HttpClientUtil {
             document.getDocumentElement().normalize();
 
             Element rootElement = document.getDocumentElement();
-            NodeList uriNode = rootElement.getElementsByTagName("hostpool");
+            NodeList uriNode = rootElement.getElementsByTagName("hostPool");
 
             for (int i = 0; i <uriNode.getLength() ; i++) {
                 Node node = uriNode.item(i);
                 NodeList childNodes = node.getChildNodes();
                 for (int j = 0; j <childNodes.getLength() ; j++) {
                     if (childNodes.item(j).getNodeType()==Node.ELEMENT_NODE) {
-                        System.out.print(childNodes.item(j).getNodeName() + ":");
-                        System.out.println(childNodes.item(j).getFirstChild().getNodeValue());
+//                        System.out.print("----------"+childNodes.item(j).getNodeName() + ":");
+//                        System.out.println("----------"+childNodes.item(j).getFirstChild().getNodeValue());
 
                         if(childNodes.item(j).getFirstChild().getNodeValue().equals(name)) {
                             return Long.valueOf(childNodes.item(j-1).getFirstChild().getNodeValue());
@@ -161,11 +163,12 @@ public class HttpClientUtil {
 
     // 创建集群
     private Boolean addCluster(Long hostPoolId,String clusterName) throws Exception {
-        String url = "http://210.0.12.25:8080/cas/casrs/cluster/add/";
+        String url = "http://210.0.12.25:8080/cas/casrs/cluster/add";
         DefaultHttpClient client = newInstance();
         HttpPost post = new HttpPost(url);
-        post.setHeader("Content-Type","text/xml;charset=UTF-8");
-        String xml = "<cluster>\n" +
+        post.addHeader("Content-Type","application/xml");
+        String xml =
+                "<cluster>\n" +
                 "    <hostPoolId>"+ hostPoolId +"</hostPoolId>\n" +
                 "    <name>"+ clusterName +"</name>\n" +
                 "    <description>Solution Hub Agent Create</description>\n" +
@@ -190,7 +193,7 @@ public class HttpClientUtil {
     }
 
     private Long getClusterIdByName(String name) throws Exception {
-        String url = "http://210.0.12.25:8080/cas/casrs/hostpool/all";
+        String url = "http://210.0.12.25:8080/cas/casrs/cluster/name/"+name;
         DefaultHttpClient client = newInstance();
         HttpGet get = new HttpGet(url);
         HttpResponse response = client.execute(get);
@@ -219,10 +222,11 @@ public class HttpClientUtil {
                             Long hostPoolId,
                             Long clusterId,
                             String nodeManagementIp) throws Exception{
-        String url = "http://210.0.12.25:8080/cas/casrs/host/add/";
+        String url = "http://210.0.12.25:8080/cas/casrs/host/add";
         DefaultHttpClient client = newInstance();
         HttpPost post = new HttpPost(url);
-        post.setHeader("Content-Type","text/xml;charset=UTF-8");
+//        post.setHeader("Content-Type","text/xml;charset=UTF-8");
+        post.addHeader("Content-Type","application/xml");
         String xml = "<host>\n" +
                 "<user>"+userName+"</user>\n" +
                 "<pwd>"+password+"</pwd>\n" +
