@@ -1,11 +1,5 @@
 package com.h3c.solutionhub.common;
 
-import java.io.InputStream;
-import java.util.Iterator;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-
-import com.sun.org.apache.xpath.internal.operations.Bool;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -21,6 +15,10 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import java.io.InputStream;
 
 /*
  * 利用HttpClient进行请求的工具类:支持http
@@ -48,12 +46,10 @@ public class HttpClientUtil {
 //            getHost("http://210.0.12.25:8080/cas/casrs/host/");
 
             String name = "hostPool_test";
-
-//            addHostPool(name);
+            addHostPool(name);
             Long hostPoolId = getHostPoolIdByName(name);
-//            System.out.println(hostPoolId);
-//            addCluster(hostPoolId,"cluster_test");
-
+            System.out.println(hostPoolId);
+            addCluster(hostPoolId,"cluster_test");
             Long clusterId = getClusterIdByName("cluster_test");
             addHost("root","Sys@1234",hostPoolId,clusterId,"210.0.12.25");
             System.out.println(clusterId);
@@ -71,6 +67,21 @@ public class HttpClientUtil {
             );
         }
         return client;
+    }
+
+    // 获取单点登录Token
+    private Boolean isConnect() throws Exception {
+        String url = "http://210.0.12.25:8080/cas/casrs/host/";
+        DefaultHttpClient client = newInstance();
+        HttpGet get = new HttpGet(url);
+        get.addHeader("accept","application/xml");
+        HttpResponse response = client.execute(get);
+        int code = response.getStatusLine().getStatusCode();
+        if(code == 200) {
+            return true;
+        } else {
+            return false;
+        }
     }
 
     // 获取单点登录Token
@@ -101,17 +112,17 @@ public class HttpClientUtil {
     }
 
     // 获取所有主机列表
-    private void getHost(String url) throws Exception {
+    private void getHost() throws Exception {
+        String url = "http://210.0.12.25:8080/cas/casrs/host/";
         DefaultHttpClient client = newInstance();
         HttpGet get = new HttpGet(url);
         get.addHeader("accept","application/xml");
         HttpResponse response = client.execute(get);
-        System.out.println(response.getStatusLine());
-        System.out.println(EntityUtils.toString(response.getEntity()));
+        System.out.println(response.getStatusLine().getStatusCode());
     }
 
     // 创建主机池
-    private Boolean addHostPool(String hostPoolName) throws Exception {
+    public Boolean addHostPool(String hostPoolName) throws Exception {
         String url = "http://210.0.12.25:8080/cas/casrs/hostpool/add/"+hostPoolName;
         DefaultHttpClient client = newInstance();
         HttpPost post = new HttpPost(url);
@@ -122,7 +133,7 @@ public class HttpClientUtil {
     }
 
     // 根据主机池名字获取主机池ID
-    private Long getHostPoolIdByName(String name) throws Exception {
+    public Long getHostPoolIdByName(String name) throws Exception {
         String url = "http://210.0.12.25:8080/cas/casrs/hostpool/all";
         DefaultHttpClient client = newInstance();
         HttpGet get = new HttpGet(url);
@@ -162,7 +173,7 @@ public class HttpClientUtil {
     }
 
     // 创建集群
-    private Boolean addCluster(Long hostPoolId,String clusterName) throws Exception {
+    public Boolean addCluster(Long hostPoolId,String clusterName) throws Exception {
         String url = "http://210.0.12.25:8080/cas/casrs/cluster/add";
         DefaultHttpClient client = newInstance();
         HttpPost post = new HttpPost(url);
@@ -192,7 +203,7 @@ public class HttpClientUtil {
         return true;
     }
 
-    private Long getClusterIdByName(String name) throws Exception {
+    public Long getClusterIdByName(String name) throws Exception {
         String url = "http://210.0.12.25:8080/cas/casrs/cluster/name/"+name;
         DefaultHttpClient client = newInstance();
         HttpGet get = new HttpGet(url);
@@ -217,7 +228,7 @@ public class HttpClientUtil {
     }
 
     // 增加主机
-    private Boolean addHost(String userName,
+    public Boolean addHost(String userName,
                             String password,
                             Long hostPoolId,
                             Long clusterId,
