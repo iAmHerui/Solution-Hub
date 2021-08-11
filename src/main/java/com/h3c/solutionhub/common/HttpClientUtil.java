@@ -45,24 +45,24 @@ public class HttpClientUtil {
 //            /* 获取所有主机列表 */
 //            getHost("http://210.0.12.25:8080/cas/casrs/host/");
 
-            String name = "hostPool_test";
-            addHostPool(name);
-            Long hostPoolId = getHostPoolIdByName(name);
-            System.out.println(hostPoolId);
-            addCluster(hostPoolId,"cluster_test");
-            Long clusterId = getClusterIdByName("cluster_test");
-            addHost("root","Sys@1234",hostPoolId,clusterId,"210.0.12.25");
-            System.out.println(clusterId);
+//            String name = "hostPool_test";
+//            addHostPool(name);
+//            Long hostPoolId = getHostPoolIdByName(name);
+//            System.out.println(hostPoolId);
+//            addCluster(hostPoolId,"cluster_test");
+//            Long clusterId = getClusterIdByName("cluster_test");
+//            addHost("root","Sys@1234",hostPoolId,clusterId,"210.0.12.25");
+//            System.out.println(clusterId);
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    private DefaultHttpClient newInstance() {
+    private DefaultHttpClient newInstance(String managementIp) {
         if(client == null) {
             client = new DefaultHttpClient();
             client.getCredentialsProvider().setCredentials(
-                    new AuthScope("210.0.12.25",8080,"VMC RESTful Web Services"),
+                    new AuthScope(managementIp,8080,"VMC RESTful Web Services"),
                     new UsernamePasswordCredentials("admin","Cloud@1234")
             );
         }
@@ -70,9 +70,9 @@ public class HttpClientUtil {
     }
 
     // 获取单点登录Token
-    private Boolean isConnect() throws Exception {
-        String url = "http://210.0.12.25:8080/cas/casrs/host/";
-        DefaultHttpClient client = newInstance();
+    public Boolean isConnect(String managementIp) throws Exception {
+        String url = "http://"+managementIp+":8080/cas/casrs/host/";
+        DefaultHttpClient client = newInstance(managementIp);
         HttpGet get = new HttpGet(url);
         get.addHeader("accept","application/xml");
         HttpResponse response = client.execute(get);
@@ -84,47 +84,37 @@ public class HttpClientUtil {
         }
     }
 
-    // 获取单点登录Token
-    private String GetSSOToken(String url) {
-        String strToken = "";
-        try {
-            DefaultHttpClient client = newInstance();
-            HttpGet httpGet = new HttpGet(url);
-            HttpResponse response = client.execute(httpGet);
-            HttpEntity entity = response.getEntity();
-            if(null != entity) {
-                InputStream in = entity.getContent();
-
-                DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-                DocumentBuilder builder = factory.newDocumentBuilder();
-                Document document = builder.parse(in);
-                document.getDocumentElement().normalize();
-
-                Element rootElement = document.getDocumentElement();
-                NodeList uriNode = rootElement.getElementsByTagName("uri");
-                Element element = (Element) uriNode.item(0);
-                strToken = element.getTextContent();
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return strToken;
-    }
-
-    // 获取所有主机列表
-    private void getHost() throws Exception {
-        String url = "http://210.0.12.25:8080/cas/casrs/host/";
-        DefaultHttpClient client = newInstance();
-        HttpGet get = new HttpGet(url);
-        get.addHeader("accept","application/xml");
-        HttpResponse response = client.execute(get);
-        System.out.println(response.getStatusLine().getStatusCode());
-    }
+//    // 获取单点登录Token
+//    private String GetSSOToken(String url) {
+//        String strToken = "";
+//        try {
+//            DefaultHttpClient client = newInstance();
+//            HttpGet httpGet = new HttpGet(url);
+//            HttpResponse response = client.execute(httpGet);
+//            HttpEntity entity = response.getEntity();
+//            if(null != entity) {
+//                InputStream in = entity.getContent();
+//
+//                DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+//                DocumentBuilder builder = factory.newDocumentBuilder();
+//                Document document = builder.parse(in);
+//                document.getDocumentElement().normalize();
+//
+//                Element rootElement = document.getDocumentElement();
+//                NodeList uriNode = rootElement.getElementsByTagName("uri");
+//                Element element = (Element) uriNode.item(0);
+//                strToken = element.getTextContent();
+//            }
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
+//        return strToken;
+//    }
 
     // 创建主机池
-    public Boolean addHostPool(String hostPoolName) throws Exception {
-        String url = "http://210.0.12.25:8080/cas/casrs/hostpool/add/"+hostPoolName;
-        DefaultHttpClient client = newInstance();
+    public Boolean addHostPool(String managementIp,String hostPoolName) throws Exception {
+        String url = "http://"+managementIp+":8080/cas/casrs/hostpool/add/"+hostPoolName;
+        DefaultHttpClient client = newInstance(managementIp);
         HttpPost post = new HttpPost(url);
         HttpResponse response = client.execute(post);
         System.out.println(response.getStatusLine());
@@ -133,9 +123,9 @@ public class HttpClientUtil {
     }
 
     // 根据主机池名字获取主机池ID
-    public Long getHostPoolIdByName(String name) throws Exception {
+    public Long getHostPoolIdByName(String managementIp,String name) throws Exception {
         String url = "http://210.0.12.25:8080/cas/casrs/hostpool/all";
-        DefaultHttpClient client = newInstance();
+        DefaultHttpClient client = newInstance(managementIp);
         HttpGet get = new HttpGet(url);
         get.addHeader("accept","application/xml");
         HttpResponse response = client.execute(get);
@@ -173,9 +163,9 @@ public class HttpClientUtil {
     }
 
     // 创建集群
-    public Boolean addCluster(Long hostPoolId,String clusterName) throws Exception {
+    public Boolean addCluster(String managementIp,Long hostPoolId,String clusterName) throws Exception {
         String url = "http://210.0.12.25:8080/cas/casrs/cluster/add";
-        DefaultHttpClient client = newInstance();
+        DefaultHttpClient client = newInstance(managementIp);
         HttpPost post = new HttpPost(url);
         post.addHeader("Content-Type","application/xml");
         String xml =
@@ -203,9 +193,9 @@ public class HttpClientUtil {
         return true;
     }
 
-    public Long getClusterIdByName(String name) throws Exception {
-        String url = "http://210.0.12.25:8080/cas/casrs/cluster/name/"+name;
-        DefaultHttpClient client = newInstance();
+    public Long getClusterIdByName(String managementIp,String name) throws Exception {
+        String url = "http://"+managementIp+":8080/cas/casrs/cluster/name/"+name;
+        DefaultHttpClient client = newInstance(managementIp);
         HttpGet get = new HttpGet(url);
         HttpResponse response = client.execute(get);
         System.out.println(response.getStatusLine());
@@ -233,8 +223,8 @@ public class HttpClientUtil {
                             Long hostPoolId,
                             Long clusterId,
                             String nodeManagementIp) throws Exception{
-        String url = "http://210.0.12.25:8080/cas/casrs/host/add";
-        DefaultHttpClient client = newInstance();
+        String url = "http://"+nodeManagementIp+":8080/cas/casrs/host/add";
+        DefaultHttpClient client = newInstance(nodeManagementIp);
         HttpPost post = new HttpPost(url);
 //        post.setHeader("Content-Type","text/xml;charset=UTF-8");
         post.addHeader("Content-Type","application/xml");

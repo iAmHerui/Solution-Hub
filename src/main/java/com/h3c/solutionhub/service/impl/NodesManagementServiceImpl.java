@@ -103,91 +103,166 @@ public class NodesManagementServiceImpl implements NodesManagementService {
         return nodesManagementMapper.deleteNodeInfo(nodeName);
     }
 
+//    @Override
+//    public Boolean deployNode(
+//            String productType,
+//            String productVersion,
+//            List<NodeBo> nodes) {
+//
+//        // 获取当前DHCP地址
+//        DhcpBO dhcpBO = nodesManagementMapper.selectDHCPInfo();
+//        log.info("DHCP info SUCCESS");
+//
+//        for(NodeBo node:nodes) {
+//            log.info("当前nodeName: "+node.getNodeName()+" ,HDMIp: "+node.getNodeHDMIP());
+//            // 1.获取token
+//            String token = getToken(node.getNodeHDMIP());
+//            if(token==null) {
+//                log.info("无法获取 "+node.getNodeName()+" token，部署失败");
+//                return false;
+//                // TODO 一期暂不支持批量部署
+//            }
+//            log.info("当前nodeName: "+node.getNodeName()+" ,token: "+token);
+//            node.setToken(token);
+//
+//            // 2.获取管理节点mac
+//            String mac = getManageNodeMac(node.getNodeHDMIP(),token);
+//            log.info("当前nodeName: "+node.getNodeName()+" ,mac: "+mac);
+//            node.setManagementMAC(mac);
+//
+//        }
+//
+//        // 3.生成配置文件dhcpd.conf
+//        createConfFile(dhcpBO.getDhcpIPPond(),dhcpBO.getDhcpMask(),nodes);
+//        log.info("dhcpd.conf 文件已生成");
+//
+//        // 4.执行dhcp restart
+//        execDHCPCommand();
+//
+//        // 4.执行mount
+//        String srcDir = execLinuxCommand(productType, productVersion);
+//        log.info("mount 已执行,mount dir = "+srcDir);
+//
+//        // 5.将mount后的文件，拷贝到临时目录
+////        copy(srcDir,"/var/nfs/mountCopy");
+//        String copyCommand = "cp -r "+srcDir+" "+"/var/nfs/mountCopy";
+//        log.info("copyCommand: "+copyCommand);
+//        Boolean result = execLinuxCommand(copyCommand);
+//        log.info(srcDir+" 目录下所有文件,已拷贝到 "+"/var/nfs/mountCopy "+result);
+//
+//        for(NodeBo node:nodes) {
+//
+//            // 5.生成该节点的ks-auto.cfg文件,并进行替换相关文本
+//            // 5.1 生成Node ks-auto.cfg定制文件
+//            String sourceCfgPath = tempFilePath+"nfs/ks/"+productVersion+"/ks-auto.cfg";
+//            String destFileName = "ks-auto-"+to16(node.getManagementIP())+".cfg";
+//            String desCfgPath = tempFilePath+"nfs/ks/"+productVersion+"/"+destFileName;
+//            File sourceFile = new File(sourceCfgPath);
+//            File desFile = new File(desCfgPath);
+//            try {
+//                // TODO是否需要判断desFile已存在？
+//                Files.copy(sourceFile.toPath(),desFile.toPath());
+//                log.info("copy ks-auto.cfg success");
+//            } catch (IOException e) {
+//                log.info("copy ks-auto.cfg failure");
+//                e.printStackTrace();
+//                return false;
+//            }
+//
+//            // 5.2 修改Node 定制文件,替换相关文本
+//            modifyDesFile(node,desCfgPath,productType);
+//            log.info("modify new ks-auto.cfg success");
+//
+//            // 6.生成配置文件 grub.cfg-nodeManageIP16进制
+//            createGrubConfFile(productType,productVersion,node.getManagementIP(),destFileName);
+//            log.info("grub.cfg 文件已生成");
+//
+//            // 7.PXE模式执行
+//            startPXE(node.getNodeHDMIP(),node.getToken());
+//            log.info("当前nodeName: "+node.getNodeName()+" ,PXE配置下发成功");
+//
+//            // 修改节点状态
+//            nodesManagementMapper.updateNodeStatus(node.getNodeId());
+//
+//            // 8.重启
+//            reboot(node.getNodeHDMIP(),node.getToken());
+//            log.info("当前nodeName: "+node.getNodeName()+" ,已强制重启");
+//        }
+//        return true;
+//    }
+
     @Override
-    public Boolean deployNode(
-            String productType,
-            String productVersion,
-            List<NodeBo> nodes) {
+    public Boolean deploySingleNode(NodeBo node,String productVersion) {
 
-        // 获取当前DHCP地址
+        log.info("---------- 当前部署节点名称: "+node.getNodeName()+" ,BEGIN ----------");
+
+        String productType = node.getNodeType();
+
         DhcpBO dhcpBO = nodesManagementMapper.selectDHCPInfo();
-        log.info("DHCP info SUCCESS");
+        log.info("---------- 获取当前DHCP地址,SUCCESS ----------");
 
-        for(NodeBo node:nodes) {
-            log.info("当前nodeName: "+node.getNodeName()+" ,HDMIp: "+node.getNodeHDMIP());
-            // 1.获取token
-            String token = getToken(node.getNodeHDMIP());
-            if(token==null) {
-                log.info("无法获取 "+node.getNodeName()+" token，部署失败");
-                return false;
-                // TODO 一期暂不支持批量部署
-            }
-            log.info("当前nodeName: "+node.getNodeName()+" ,token: "+token);
-            node.setToken(token);
-
-            // 2.获取管理节点mac
-            String mac = getManageNodeMac(node.getNodeHDMIP(),token);
-            log.info("当前nodeName: "+node.getNodeName()+" ,mac: "+mac);
-            node.setManagementMAC(mac);
-
+        String token = getToken(node.getNodeHDMIP());
+        if(token==null) {
+            log.error("---------- 无法获取节点token,"+node.getNodeName()+" 部署失败 ----------");
+            return false;
         }
+        log.info("---------- 获取当前token,SUCCESS.当前节点: "+node.getNodeName()+",token:"+token+"----------");
+        node.setToken(token);
 
-        // 3.生成配置文件dhcpd.conf
-        createConfFile(dhcpBO.getDhcpIPPond(),dhcpBO.getDhcpMask(),nodes);
-        log.info("dhcpd.conf 文件已生成");
+        String mac = getManageNodeMac(node.getNodeHDMIP(),token);
+        log.info("---------- 获取当前mac,SUCCESS.当前节点: "+node.getNodeName()+",mac:"+mac+"----------");
+        node.setManagementMAC(mac);
 
-        // 4.执行dhcp restart
+        createConfFile(dhcpBO.getDhcpIPPond(),dhcpBO.getDhcpMask(),node);
+        log.info("---------- 节点信息添加到dhcpd.conf,SUCCESS ----------");
+
         execDHCPCommand();
+        log.error("---------- DHCP restart,SUCCESS ----------");
 
-        // 4.执行mount
         String srcDir = execLinuxCommand(productType, productVersion);
-        log.info("mount 已执行,mount dir = "+srcDir);
+        log.info("---------- mount iso,SUCCESS.mount dir = "+srcDir+" ----------");
 
-        // 5.将mount后的文件，拷贝到临时目录
-//        copy(srcDir,"/var/nfs/mountCopy");
         String copyCommand = "cp -r "+srcDir+" "+"/var/nfs/mountCopy";
-        log.info("copyCommand: "+copyCommand);
+        log.info("---------- copy command: "+copyCommand+" ----------");
         Boolean result = execLinuxCommand(copyCommand);
-        log.info(srcDir+" 目录下所有文件,已拷贝到 "+"/var/nfs/mountCopy "+result);
+        log.info("---------- copy command,SUCCESS.已拷贝到 /var/nfs/mountCopy ----------");
 
-        for(NodeBo node:nodes) {
-
-            // 5.生成该节点的ks-auto.cfg文件,并进行替换相关文本
-            // 5.1 生成Node ks-auto.cfg定制文件
-            String sourceCfgPath = tempFilePath+"nfs/ks/"+productVersion+"/ks-auto.cfg";
-            String destFileName = "ks-auto-"+to16(node.getManagementIP())+".cfg";
-            String desCfgPath = tempFilePath+"nfs/ks/"+productVersion+"/"+destFileName;
-            File sourceFile = new File(sourceCfgPath);
-            File desFile = new File(desCfgPath);
-            try {
-                // TODO是否需要判断desFile已存在？
-                Files.copy(sourceFile.toPath(),desFile.toPath());
-                log.info("copy ks-auto.cfg success");
-            } catch (IOException e) {
-                log.info("copy ks-auto.cfg failure");
-                e.printStackTrace();
-                return false;
-            }
-
-            // 5.2 修改Node 定制文件,替换相关文本
-            modifyDesFile(node,desCfgPath,productType);
-            log.info("modify new ks-auto.cfg success");
-
-            // 6.生成配置文件 grub.cfg-nodeManageIP16进制
-            createGrubConfFile(productType,productVersion,node.getManagementIP(),destFileName);
-            log.info("grub.cfg 文件已生成");
-
-            // 7.PXE模式执行
-            startPXE(node.getNodeHDMIP(),node.getToken());
-            log.info("当前nodeName: "+node.getNodeName()+" ,PXE配置下发成功");
-
-            // 修改节点状态
-            nodesManagementMapper.updateNodeStatus(node.getNodeId());
-
-            // 8.重启
-            reboot(node.getNodeHDMIP(),node.getToken());
-            log.info("当前nodeName: "+node.getNodeName()+" ,已强制重启");
+        // 5.生成该节点的ks-auto.cfg文件,并进行替换相关文本
+        // 5.1 生成Node ks-auto.cfg定制文件
+        String sourceCfgPath = tempFilePath+"nfs/ks/"+productVersion+"/ks-auto.cfg";
+        String destFileName = "ks-auto-"+to16(node.getManagementIP())+".cfg";
+        String desCfgPath = tempFilePath+"nfs/ks/"+productVersion+"/"+destFileName;
+        File sourceFile = new File(sourceCfgPath);
+        File desFile = new File(desCfgPath);
+        try {
+            // TODO 是否需要判断desFile已存在？
+            Files.copy(sourceFile.toPath(),desFile.toPath());
+            log.info("---------- create new ks-auto.cfg,SUCCESS ----------");
+        } catch (IOException e) {
+            log.error("---------- create new ks-auto.cfg,FAILURE ----------");
+            e.printStackTrace();
+            return false;
         }
+
+        // 5.2 修改Node 定制文件,替换相关文本
+        modifyDesFile(node,desCfgPath,productType);
+        log.info("---------- modify new ks-auto.cfg,SUCCESS ----------");
+
+        // 6.生成配置文件 grub.cfg-nodeManageIP16进制
+        createGrubConfFile(productType,productVersion,node.getManagementIP(),destFileName);
+        log.info("---------- create new grub.cfg,SUCCESS ----------");
+
+        // 7.PXE模式执行
+        startPXE(node.getNodeHDMIP(),node.getToken());
+
+        // 修改节点状态
+        nodesManagementMapper.updateNodeStatus(node.getNodeId());
+        log.info("---------- 节点状态已修改:占用,SUCCESS.当前节点: "+node.getNodeName()+" ----------");
+
+        // 8.重启
+        reboot(node.getNodeHDMIP(),node.getToken());
+
+        log.info("---------- 当前部署节点名称: "+node.getNodeName()+" ,END ----------");
         return true;
     }
 
@@ -216,23 +291,6 @@ public class NodesManagementServiceImpl implements NodesManagementService {
         } else {
             return true;
         }
-    }
-
-    @Override
-    public Boolean testAsyn() {
-        try {
-            log.info("Current Thread : {}",Thread.currentThread().getName());
-
-            log.info("deploy CVM");
-            TimeUnit.SECONDS.sleep(5);
-            log.info("deploy CVK");
-            TimeUnit.SECONDS.sleep(5);
-            asyncUtil.asyncDeployCluster();
-        } catch (Exception e) {
-            e.printStackTrace();
-            return false;
-        }
-        return true;
     }
 
 
@@ -293,7 +351,7 @@ public class NodesManagementServiceImpl implements NodesManagementService {
         map.put("Boot",childMap);
 
         HttpResponse response = new HttpsClientUtil().sendHttpsPatch2(url,map,token);
-        System.out.println("reboot 响应状态为:" + response.getStatusLine());
+        log.info("---------- startPXE,SUCCESS.响应状态: "+response.getStatusLine()+"----------");
     }
 
     private void reboot(String nodeMangeIP,String token) {
@@ -303,9 +361,8 @@ public class NodesManagementServiceImpl implements NodesManagementService {
         map.put("ResetType","ForceRestart");
 
         HttpResponse response = new HttpsClientUtil().sendHttpsPost(url,map,token);
-        System.out.println("reboot 响应状态为:" + response.getStatusLine());
+        log.info("---------- reboot,SUCCESS.响应状态: "+response.getStatusLine()+"----------");
 
-//        restTemplateTool.sendHttps(url,map,HttpMethod.PATCH,token);
     }
 
     /**
@@ -314,7 +371,7 @@ public class NodesManagementServiceImpl implements NodesManagementService {
     private void createConfFile(
             String dhcpIPPond,
             String dhcpMask,
-            List<NodeBo> nodeList) {
+            NodeBo nodeBo) {
         String filePath = dhcpFilePath;
         File file = new File(filePath);
         String confInfo ="";
@@ -327,19 +384,18 @@ public class NodesManagementServiceImpl implements NodesManagementService {
                             "next-server " + hostIP() + ";\n" +
                             "}\n";
         }
-        for(NodeBo nodeBo:nodeList) {
-            if(!nodesManagementMapper.selectNodeStatus(nodeBo.getNodeName()).equals("占用")) {
-                log.info("nodeName: "+nodeBo.getNodeName()+" 该节点未占用，添加DHCP配置");
-                String mac = nodeBo.getManagementMAC();
-                String ip = nodeBo.getManagementIP();
-                String confNodeInfo =
-                        "host " + nodeBo.getNodeName() + " {\n" +
-                                "    hardware ethernet " + mac + ";\n" +
-                                "    fixed-address " + ip + ";\n" +
-                                "}\n";
-                confInfo = confInfo + confNodeInfo;
-            }
+        if(!nodesManagementMapper.selectNodeStatus(nodeBo.getNodeName()).equals("占用")) {
+            log.info("nodeName: "+nodeBo.getNodeName()+" 该节点未占用，添加DHCP配置");
+            String mac = nodeBo.getManagementMAC();
+            String ip = nodeBo.getManagementIP();
+            String confNodeInfo =
+                    "host " + nodeBo.getNodeName() + " {\n" +
+                            "    hardware ethernet " + mac + ";\n" +
+                            "    fixed-address " + ip + ";\n" +
+                            "}\n";
+            confInfo = confInfo + confNodeInfo;
         }
+
         createFileForDHCPConf(confInfo,filePath);
     }
 
@@ -431,9 +487,7 @@ public class NodesManagementServiceImpl implements NodesManagementService {
 
     private Boolean execDHCPCommand() {
 
-        // 执行mount shell
         String command = "systemctl restart dhcpd";
-        log.info("DHCP command: "+command);
 
         Runtime run = Runtime.getRuntime();
         Process process = null;
@@ -442,14 +496,13 @@ public class NodesManagementServiceImpl implements NodesManagementService {
             process = run.exec(command);
             process.waitFor();
             process.destroy();
-            log.info("DHCP restart SUCCESS");
             return true;
         } catch (IOException e) {
             e.printStackTrace();
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        log.info("DHCP restart FAILURE");
+        log.error("---------- DHCP restart,FAILURE ----------");
         return false;
     }
 
@@ -466,7 +519,7 @@ public class NodesManagementServiceImpl implements NodesManagementService {
 
         // 执行mount shell
         String command = "mount -t auto /var/iso/"+productVersion+"/"+isoName+" /var/nfs/"+productVersion+"/"+prefixName;
-        log.info("mount command: "+command);
+        log.info("---------- mount command: "+command+" ----------");
 
         Runtime run = Runtime.getRuntime();
         Process process = null;
@@ -555,8 +608,6 @@ public class NodesManagementServiceImpl implements NodesManagementService {
                 "--device=eth0" +" " +
                 "--bootproto=static " +
                 "--ip=" + node.getManagementIP() +" " +
-//                "--netmask=255.255.224.0" +" " +
-//                "--gateway=210.0.0.254" +" " +
                 "--netmask=" + node.getManagementMask() +" " +
                 "--gateway=" + node.getManagementGateway() +" " +
                 "--onboot=yes " +
@@ -568,13 +619,12 @@ public class NodesManagementServiceImpl implements NodesManagementService {
         strReplace(desFilePath,sourceLine_1,desLine_1);
         strReplace(desFilePath,sourceLine_2,desLine_2);
 
-        // 如果是CVM,不需要改动。如果是CVK,则需要改动 TODO 一期默认部署CVM
-//        if(productType.equals("CAS_CVK")) {
-//            String sourceLine_3 = "virtualization-host-environment-cvm";
-//            String desLine_3 = "virtualization-host-environment";
-//            strReplace(desFilePath,sourceLine_3,desLine_3);
-//        }
-//        log.info("ks-auto.cfg modify success!");
+        // 如果是CVM,不需要改动。如果是CVK,则需要改动
+        if(productType.equals("CAS_CVK")) {
+            String sourceLine_3 = "virtualization-host-environment-cvm";
+            String desLine_3 = "virtualization-host-environment";
+            strReplace(desFilePath,sourceLine_3,desLine_3);
+        }
     }
 
     private void strReplace(String path,String srcStr,String replaceStr) {

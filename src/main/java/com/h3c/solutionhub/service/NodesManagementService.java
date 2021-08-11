@@ -15,16 +15,16 @@ public interface NodesManagementService {
 
     Boolean deleteNode(String nodeName);
 
-    Boolean deployNode(
-            String productType,
-            String productVersion,
-            List<NodeBo> nodes);
+//    Boolean deployNode(
+//            String productType,
+//            String productVersion,
+//            List<NodeBo> nodes);
+
+    Boolean deploySingleNode(NodeBo node,String productVersion);
 
     Boolean addDHCPInfo(String dhcpIPPond, String dhcpMask);
 
     DhcpBO getDHCPInfo();
 
     Boolean isNodeExist(String nodeName);
-
-    Boolean testAsyn();
 }

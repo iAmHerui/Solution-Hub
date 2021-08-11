@@ -84,37 +84,37 @@ public class NodesManagementController {
         }
     }
 
-    @ApiOperation(value = "节点部署",notes = "节点部署")
-    @CrossOrigin(origins ="*",maxAge =3600)
-    @PostMapping(value = "/nodeDeploy")
-    public String nodeDeploy(@RequestBody Map<String,Object> params) {
-
-        String productType = params.get("productType").toString();
-        String productVersion = params.get("productVersion").toString();
-        String nodeListString = params.get("nodes").toString();
-
-        JSONArray jsonArray = JSONArray.parseArray(nodeListString);
-        List<NodeBo> nodes = new ArrayList<>();
-        for(int i=0;i<jsonArray.size();i++) {
-            JSONObject nodeBo = jsonArray.getJSONObject(i);
-            NodeBo node = new NodeBo();
-            node.setNodeId(nodeBo.getInteger("nodeId"));
-            node.setNodeHDMIP(nodeBo.getString("nodeHDMIP"));
-            node.setManagementIP(nodeBo.getString("managementIP"));
-            node.setNodeName(nodeBo.getString("nodeName"));
-
-            node.setManagementMask(nodeBo.getString("managementMask"));
-            node.setManagementGateway(nodeBo.getString("managementGateway"));
-
-            nodes.add(node);
-        }
-        Boolean result = nodesManagementService.deployNode(productType,productVersion,nodes);
-        if(result==true) {
-            return "节点部署成功";
-        } else {
-            return "节点部署失败";
-        }
-    }
+//    @ApiOperation(value = "节点部署",notes = "节点部署")
+//    @CrossOrigin(origins ="*",maxAge =3600)
+//    @PostMapping(value = "/nodeDeploy")
+//    public String nodeDeploy(@RequestBody Map<String,Object> params) {
+//
+//        String productType = params.get("productType").toString();
+//        String productVersion = params.get("productVersion").toString();
+//        String nodeListString = params.get("nodes").toString();
+//
+//        JSONArray jsonArray = JSONArray.parseArray(nodeListString);
+//        List<NodeBo> nodes = new ArrayList<>();
+//        for(int i=0;i<jsonArray.size();i++) {
+//            JSONObject nodeBo = jsonArray.getJSONObject(i);
+//            NodeBo node = new NodeBo();
+//            node.setNodeId(nodeBo.getInteger("nodeId"));
+//            node.setNodeHDMIP(nodeBo.getString("nodeHDMIP"));
+//            node.setManagementIP(nodeBo.getString("managementIP"));
+//            node.setNodeName(nodeBo.getString("nodeName"));
+//
+//            node.setManagementMask(nodeBo.getString("managementMask"));
+//            node.setManagementGateway(nodeBo.getString("managementGateway"));
+//
+//            nodes.add(node);
+//        }
+//        Boolean result = nodesManagementService.deployNode(productType,productVersion,nodes);
+//        if(result==true) {
+//            return "节点部署成功";
+//        } else {
+//            return "节点部署失败";
+//        }
+//    }
 
     @ApiOperation(value = "查看DHCP地址",notes = "查看DHCP地址")
     @CrossOrigin(origins ="*",maxAge =3600)
@@ -210,10 +210,5 @@ public class NodesManagementController {
 //        return true;
 //    }
 
-    @ApiOperation(value = "节点部署Test",notes = "节点部署Test")
-    @GetMapping(value = "/nodeDeployTest")
-    public Boolean nodeDeployTest() {
-        return nodesManagementService.testAsyn();
-    }
 
 }
