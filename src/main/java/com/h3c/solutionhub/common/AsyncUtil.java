@@ -2,6 +2,7 @@ package com.h3c.solutionhub.common;
 
 import com.h3c.solutionhub.entity.NodeBo;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
@@ -11,6 +12,12 @@ import java.util.concurrent.TimeUnit;
 @Slf4j
 @Component
 public class AsyncUtil {
+
+    @Value("${nodeManagementUserName}")
+    private String nodeManagementUserName;
+
+    @Value("${nodeManagementPassword}")
+    private String nodeManagementPassword;
 
     @Async
     public void asyncDeployCluster(String hostPoolName, String clusterName, List<NodeBo> nodeList) throws Exception{
@@ -54,7 +61,7 @@ public class AsyncUtil {
                 for(NodeBo node:nodeList) {
                     // TODO 只需要添加CVK吗？
                     if(node.getNodeType().equals("CAS_CVK")) {
-                        httpClientUtil.addHost(node.getManagementUserName(),node.getManagementPassword(),hostPoolId,clusterId,node.getManagementIP());
+                        httpClientUtil.addHost(nodeManagementUserName,nodeManagementPassword,hostPoolId,clusterId,node.getManagementIP());
                         log.info("---------- node: "+node.getNodeName()+",主机添加,SUCCESS ----------");
                     }
                 }

@@ -26,8 +26,10 @@ public class NodeBo {
     // 节点管理IP
     private String managementIP;
 
+    // 节点管理账号
     private String  managementUserName;
 
+    // 节点管理密码
     private String  managementPassword;
 
     // 节点管理mac

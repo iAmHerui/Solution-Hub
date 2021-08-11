@@ -9,8 +9,8 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.util.EntityUtils;
 import org.junit.Test;
+import org.springframework.beans.factory.annotation.Value;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -27,6 +27,12 @@ import java.io.InputStream;
 public class HttpClientUtil {
 
     public DefaultHttpClient client;
+
+    @Value("${casUserName}")
+    private String casUserName;
+
+    @Value("${casPassword}")
+    private String casPassword;
 
     @Test
     public void test() {
@@ -63,7 +69,7 @@ public class HttpClientUtil {
             client = new DefaultHttpClient();
             client.getCredentialsProvider().setCredentials(
                     new AuthScope(managementIp,8080,"VMC RESTful Web Services"),
-                    new UsernamePasswordCredentials("admin","Cloud@1234")
+                    new UsernamePasswordCredentials(casUserName,casPassword)
             );
         }
         return client;

@@ -1,7 +1,5 @@
 package com.h3c.solutionhub.controller;
 
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
 import com.h3c.solutionhub.entity.DhcpBO;
 import com.h3c.solutionhub.entity.NodeBo;
 import com.h3c.solutionhub.service.NodesManagementService;
@@ -13,10 +11,8 @@ import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
 import java.net.*;
-import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
-import java.util.Map;
 
 @Slf4j
 @Api(value = "节点管理",tags = "节点管理")
