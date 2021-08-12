@@ -2,6 +2,8 @@ package com.h3c.solutionhub.service.impl;
 
 import com.h3c.solutionhub.common.AsyncUtil;
 import com.h3c.solutionhub.entity.NodeBo;
+import com.h3c.solutionhub.entity.ProjectBo;
+import com.h3c.solutionhub.mapper.ProjectManagementMapper;
 import com.h3c.solutionhub.service.NodesManagementService;
 import com.h3c.solutionhub.service.ProjectManagementService;
 import lombok.extern.slf4j.Slf4j;
@@ -16,6 +18,9 @@ public class ProjectManagementServiceImpl implements ProjectManagementService {
 
     @Autowired
     NodesManagementService nodesManagementService;
+
+    @Autowired
+    ProjectManagementMapper projectManagementMapper;
 
     @Autowired
     AsyncUtil asyncUtil;
@@ -40,5 +45,56 @@ public class ProjectManagementServiceImpl implements ProjectManagementService {
             return false;
         }
         return true;
+    }
+
+    @Override
+    public List<ProjectBo> getProjectList() {
+
+        // 查询工程信息
+        List<ProjectBo> projectList = projectManagementMapper.selectProjectList();
+
+        // 查询工程和产品关联信息
+        for(ProjectBo project : projectList) {
+            List<String> productList = projectManagementMapper.selectProductName(project.getProjectName());
+            project.setProjectProductList(productList);
+        }
+
+        return projectList;
+    }
+
+    @Override
+    public Boolean addProject(ProjectBo project) {
+
+        // 添加工程信息
+        projectManagementMapper.insertProject(
+                project.getProjectName(),
+                project.getProjectDescribe());
+
+        // 添加工程和产品关系
+        List<String> productList = project.getProjectProductList();
+        for(String productName : productList) {
+            projectManagementMapper.insertRefProjectProduct(project.getProjectName(),productName);
+        }
+
+        return true;
+    }
+
+    @Override
+    public Boolean editProject(ProjectBo project) {
+        return projectManagementMapper.updateProject(
+                project.getProjectName(),
+                project.getProjectDescribe());
+    }
+
+    @Override
+    public Boolean deleteProject(int projectId) {
+
+        String projectName = projectManagementMapper.getProjectNameById(projectId);
+
+        // 删除工程信息
+        projectManagementMapper.deleteProject(projectId);
+
+        // 删除工程和产品关联信息
+        return projectManagementMapper.deleteRefProjectProduct(projectName);
     }
 }

@@ -3,6 +3,7 @@ package com.h3c.solutionhub.controller;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.h3c.solutionhub.entity.NodeBo;
+import com.h3c.solutionhub.entity.ProjectBo;
 import com.h3c.solutionhub.service.ProjectManagementService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -58,6 +59,58 @@ public class ProjectManagementController {
             return "工程部署成功";
         } else {
             return "工程部署失败";
+        }
+    }
+
+    @ApiOperation(value = "工程列表",notes = "工程列表")
+    @CrossOrigin(origins ="*",maxAge =3600)
+    @GetMapping(value = "/projectList")
+    public List<ProjectBo> projectList() {
+        return projectManagementService.getProjectList();
+    }
+
+    @ApiOperation(value = "添加工程",notes = "添加工程")
+    @CrossOrigin(origins ="*",maxAge =3600)
+    @PostMapping(value = "/projectAdd")
+    public String projectAdd() {
+
+        ProjectBo project = new ProjectBo();
+        project.setProjectName("test");
+        project.setProjectDescribe("test");
+        List<String> productList = new ArrayList<>();
+        productList.add("CAS");
+        productList.add("OneStor");
+        project.setProjectProductList(productList);
+
+        Boolean result = projectManagementService.addProject(project);
+        if(result==true) {
+            return "工程添加成功";
+        } else {
+            return "工程添加失败";
+        }
+    }
+
+    @ApiOperation(value = "修改工程",notes = "修改工程")
+    @CrossOrigin(origins ="*",maxAge =3600)
+    @PostMapping(value = "/projectEdit")
+    public String projectEdit(ProjectBo project) {
+        Boolean result = projectManagementService.editProject(project);
+        if(result==true) {
+            return "工程修改成功";
+        } else {
+            return "工程修改失败";
+        }
+    }
+
+    @ApiOperation(value = "删除工程",notes = "删除工程")
+    @CrossOrigin(origins ="*",maxAge =3600)
+    @PostMapping(value = "/projectDelete")
+    public String projectDelete(int projectId) {
+        Boolean result = projectManagementService.deleteProject(projectId);
+        if(result==true) {
+            return "工程删除成功";
+        } else {
+            return "工程删除失败";
         }
     }
 }

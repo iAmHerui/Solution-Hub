@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.h3c.solutionhub.mapper.ProjectManagementMapper">
+
+    <select id="selectProjectList" resultType="com.h3c.solutionhub.entity.ProjectBo">
+        SELECT
+            id as projectId,
+            project_name as projectName,
+            project_describe as projectDescribe
+        FROM project_management
+    </select>
+
+    <insert id="insertProject" >
+        INSERT INTO  project_management (
+            project_name,
+            project_describe
+        ) VALUES (
+            #{projectName,jdbcType=VARCHAR},
+            #{projectDescribe,jdbcType=VARCHAR}
+        )
+    </insert>
+
+    <update id="updateProject" >
+    UPDATE  project_management
+        SET
+            project_describe = #{projectDescribe,jdbcType=VARCHAR}
+        WHERE project_name = #{projectName,jdbcType=VARCHAR}
+    </update>
+
+    <delete id="deleteProject">
+        DELETE FROM project_management WHERE id = #{projectId,jdbcType=INTEGER}
+    </delete>
+
+    <select id="getProjectNameById" resultType="string">
+        SELECT
+            project_name as projectName
+        FROM project_management
+        WHERE id = #{projectId,jdbcType=INTEGER}
+    </select>
+
+    <insert id="insertRefProjectProduct" >
+        INSERT INTO  rel_project_product (
+            project_name,
+            product_name
+        ) VALUES (
+            #{projectName,jdbcType=VARCHAR},
+            #{productName,jdbcType=VARCHAR}
+        )
+    </insert>
+
+    <delete id="deleteRefProjectProduct">
+        DELETE FROM rel_project_product WHERE project_name = #{projectName,jdbcType=VARCHAR}
+    </delete>
+
+    <select id="selectProductName" resultType="string">
+        SELECT
+            product_name as productName
+        FROM rel_project_product
+        WHERE project_name = #{projectName,jdbcType=VARCHAR}
+    </select>
+
+</mapper>
