@@ -72,12 +72,22 @@ public class ProjectManagementController {
     @ApiOperation(value = "添加工程",notes = "添加工程")
     @CrossOrigin(origins ="*",maxAge =3600)
     @PostMapping(value = "/projectAdd")
-    public String projectAdd(ProjectBo project) {
+    public String projectAdd(@RequestBody Map<String,Object> params) {
 
+        String projectName = params.get("name").toString();
+        String projectDescribe = params.get("brief").toString();
+        String nodeListString = params.get("products").toString();
+        JSONArray jsonArray = JSONArray.parseArray(nodeListString);
+        List<String> projectProductList = new ArrayList<>();
+        for(int i=0;i<jsonArray.size();i++) {
+            String product = jsonArray.get(i).toString();
+            projectProductList.add(product);
+        }
 
-        List<String> productList = new ArrayList<>();
-        productList.add("CAS");
-        project.setProjectProductList(productList);
+        ProjectBo project = new ProjectBo();
+        project.setProjectName(projectName);
+        project.setProjectDescribe(projectDescribe);
+        project.setProjectProductList(projectProductList);
 
         Boolean result = projectManagementService.addProject(project);
         if(result==true) {
