@@ -18,4 +18,5 @@ public class ProjectBo {
 
     // 工程描述
     private List<String> projectProductList;
+
 }

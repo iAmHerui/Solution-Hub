@@ -92,7 +92,6 @@
             node_name = #{nodeName,jdbcType=VARCHAR},
             node_hdm_ip = #{nodeHDMIP,jdbcType=VARCHAR},
             node_type = #{nodeType,jdbcType=VARCHAR},
-            node_status = #{nodeStatus,jdbcType=VARCHAR},
             node_hdm_password = #{nodeHDMPaasword,jdbcType=VARCHAR},
             management_ip = #{managementIP,jdbcType=VARCHAR},
             business_ip = #{businessIP,jdbcType=VARCHAR} ,

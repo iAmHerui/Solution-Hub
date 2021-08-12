@@ -72,14 +72,11 @@ public class ProjectManagementController {
     @ApiOperation(value = "添加工程",notes = "添加工程")
     @CrossOrigin(origins ="*",maxAge =3600)
     @PostMapping(value = "/projectAdd")
-    public String projectAdd() {
+    public String projectAdd(ProjectBo project) {
 
-        ProjectBo project = new ProjectBo();
-        project.setProjectName("test");
-        project.setProjectDescribe("test");
+
         List<String> productList = new ArrayList<>();
         productList.add("CAS");
-        productList.add("OneStor");
         project.setProjectProductList(productList);
 
         Boolean result = projectManagementService.addProject(project);
