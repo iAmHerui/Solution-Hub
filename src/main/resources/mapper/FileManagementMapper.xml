@@ -46,7 +46,6 @@
         SELECT file_name
         FROM file_management
         WHERE
-            product_type = #{productType} and
             product_version = #{productVersion} and
             file_type = 'iso'
     </select>

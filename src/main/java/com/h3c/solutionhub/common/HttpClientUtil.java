@@ -18,6 +18,7 @@ import org.w3c.dom.NodeList;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
+import java.io.IOException;
 import java.io.InputStream;
 
 /*
@@ -51,13 +52,17 @@ public class HttpClientUtil {
 //            /* 获取所有主机列表 */
 //            getHost("http://210.0.12.25:8080/cas/casrs/host/");
 
-//            String name = "hostPool_test";
-//            addHostPool(name);
-//            Long hostPoolId = getHostPoolIdByName(name);
-//            System.out.println(hostPoolId);
-//            addCluster(hostPoolId,"cluster_test");
-//            Long clusterId = getClusterIdByName("cluster_test");
-//            addHost("root","Sys@1234",hostPoolId,clusterId,"210.0.12.25");
+            String name = "hostPool_test";
+            String ip = "210.0.12.25";
+            Boolean result = isConnect(ip);
+
+                addHostPool(ip, name);
+                Long hostPoolId = getHostPoolIdByName(ip, name);
+                System.out.println(hostPoolId);
+                addCluster(ip, hostPoolId, "cluster_test");
+
+//            Long clusterId = getClusterIdByName(ip,"cluster_test");
+//            addHost("root","Sys@1234",hostPoolId,clusterId,"210.0.12.26");
 //            System.out.println(clusterId);
         } catch (Exception e) {
             e.printStackTrace();
@@ -65,23 +70,29 @@ public class HttpClientUtil {
     }
 
     private DefaultHttpClient newInstance(String managementIp) {
-        if(client == null) {
+//        if(client == null) {
             client = new DefaultHttpClient();
             client.getCredentialsProvider().setCredentials(
                     new AuthScope(managementIp,8080,"VMC RESTful Web Services"),
-                    new UsernamePasswordCredentials(casUserName,casPassword)
+                    new UsernamePasswordCredentials("admin","Cloud@1234")
             );
-        }
+//        }
         return client;
     }
 
     // 获取单点登录Token
-    public Boolean isConnect(String managementIp) throws Exception {
+    public Boolean isConnect(String managementIp) {
         String url = "http://"+managementIp+":8080/cas/casrs/host/";
         DefaultHttpClient client = newInstance(managementIp);
         HttpGet get = new HttpGet(url);
         get.addHeader("accept","application/xml");
-        HttpResponse response = client.execute(get);
+        HttpResponse response = null;
+        try {
+            response = client.execute(get);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
         int code = response.getStatusLine().getStatusCode();
         if(code == 200) {
             return true;
@@ -130,7 +141,7 @@ public class HttpClientUtil {
 
     // 根据主机池名字获取主机池ID
     public Long getHostPoolIdByName(String managementIp,String name) throws Exception {
-        String url = "http://210.0.12.25:8080/cas/casrs/hostpool/all";
+        String url = "http://"+managementIp+":8080/cas/casrs/hostpool/all";
         DefaultHttpClient client = newInstance(managementIp);
         HttpGet get = new HttpGet(url);
         get.addHeader("accept","application/xml");
@@ -170,7 +181,7 @@ public class HttpClientUtil {
 
     // 创建集群
     public Boolean addCluster(String managementIp,Long hostPoolId,String clusterName) throws Exception {
-        String url = "http://210.0.12.25:8080/cas/casrs/cluster/add";
+        String url = "http://"+managementIp+":8080/cas/casrs/cluster/add";
         DefaultHttpClient client = newInstance(managementIp);
         HttpPost post = new HttpPost(url);
         post.addHeader("Content-Type","application/xml");

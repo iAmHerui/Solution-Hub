@@ -31,10 +31,10 @@ public class ProjectManagementServiceImpl implements ProjectManagementService {
         log.info("---------- 工程部署 BEGIN ----------");
         log.info("Current Thread : {}",Thread.currentThread().getName());
 
-        // 1.部署节点
-        for(NodeBo node:nodeList) {
-            nodesManagementService.deploySingleNode(node,productVersion);
-        }
+//        // 1.部署节点
+//        for(NodeBo node:nodeList) {
+//            nodesManagementService.deploySingleNode(node,productVersion);
+//        }
 
         // 2.配置集群
         try {
