@@ -99,8 +99,26 @@ public class ProjectManagementController {
 
     @ApiOperation(value = "修改工程",notes = "修改工程")
     @CrossOrigin(origins ="*",maxAge =3600)
-    @PostMapping(value = "/projectEdit")
-    public String projectEdit(ProjectBo project) {
+    @PutMapping(value = "/projectEdit")
+    public String projectEdit(@RequestBody Map<String,Object> params) {
+
+        int projectId = Integer.parseInt(params.get("projectId").toString());
+        String projectName = params.get("name").toString();
+        String projectDescribe = params.get("brief").toString();
+        String nodeListString = params.get("products").toString();
+        JSONArray jsonArray = JSONArray.parseArray(nodeListString);
+        List<String> projectProductList = new ArrayList<>();
+        for(int i=0;i<jsonArray.size();i++) {
+            String product = jsonArray.get(i).toString();
+            projectProductList.add(product);
+        }
+
+        ProjectBo project = new ProjectBo();
+        project.setProjectId(projectId);
+        project.setProjectName(projectName);
+        project.setProjectDescribe(projectDescribe);
+        project.setProjectProductList(projectProductList);
+
         Boolean result = projectManagementService.editProject(project);
         if(result==true) {
             return "工程修改成功";
