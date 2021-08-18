@@ -222,7 +222,8 @@ public class NodesManagementServiceImpl implements NodesManagementService {
         String srcDir = execLinuxCommand(productType, productVersion);
         log.info("---------- mount iso,SUCCESS.mount dir = "+srcDir+" ----------");
 
-        String copyCommand = "cp -r "+srcDir+" "+"/var/nfs/mountCopy";
+//        String copyCommand = "cp -r "+srcDir+" "+"/var/nfs/mountCopy";
+        String copyCommand = "cp -r "+"/var/nfs/mountCopy/"+productVersion+" "+srcDir;
         log.info("---------- copy command: "+copyCommand+" ----------");
         Boolean result = execLinuxCommand(copyCommand);
         log.info("---------- copy command,SUCCESS.已拷贝到 /var/nfs/mountCopy ----------");
@@ -317,8 +318,12 @@ public class NodesManagementServiceImpl implements NodesManagementService {
     }
 
     private String getManageNodeMac(String nodeMangeIP,String token) {
-        String url = "https://"+nodeMangeIP+"/redfish/v1/Chassis/1/NetworkAdapters/mLOM/NetworkPorts/1";
-
+        String url = "";
+//        if(nodeMangeIP.equals("210.0.7.210")) {
+//            url = "https://"+nodeMangeIP+"/redfish/v1/Chassis/1/NetworkAdapters/PCIeSlot1/NetworkPorts/1";
+//        } else {
+        url = "https://" + nodeMangeIP + "/redfish/v1/Chassis/1/NetworkAdapters/mLOM/NetworkPorts/1";
+//        }
 //        ResponseEntity responseEntity =restTemplateTool.sendHttps(url,null, HttpMethod.GET,token);
         HttpResponse response = new HttpsClientUtil().sendHttpsGet(url,null,token);
 
@@ -409,7 +414,7 @@ public class NodesManagementServiceImpl implements NodesManagementService {
     private void createGrubConfFile(String productType, String productVersion,String nodeManageIp,String desFileName) {
 
         //获取文件名，不要后缀
-        String isoName = fileManagementMapper.getISOName(productType,productVersion);
+        String isoName = fileManagementMapper.getISOName(productVersion);
         String prefixName = isoName.substring(0,isoName.lastIndexOf("."));
 
         String fileInfo =
@@ -508,17 +513,23 @@ public class NodesManagementServiceImpl implements NodesManagementService {
 
     private String execLinuxCommand(String productType, String productVersion) {
 
-        String isoName = fileManagementMapper.getISOName(productType,productVersion);
+        String isoName = fileManagementMapper.getISOName(productVersion);
         String prefixName = isoName.substring(0,isoName.lastIndexOf("."));
-        //创建 /var/www/html/version/iso名字前缀/ 目录
+
         String filePath = "/var/nfs/"+productVersion+"/"+prefixName;
         File file = new File(filePath);
         if (!file.exists()) {
             file.mkdirs();
         }
 
+        String mountPath = "/var/nfs/mountpath/"+productVersion;
+        File file1 = new File(mountPath);
+        if (!file1.exists()) {
+            file1.mkdirs();
+        }
+
         // 执行mount shell
-        String command = "mount -t auto /var/iso/"+productVersion+"/"+isoName+" /var/nfs/"+productVersion+"/"+prefixName;
+        String command = "mount -t auto /var/iso/"+productVersion+"/"+isoName+" "+mountPath;
         log.info("---------- mount command: "+command+" ----------");
 
         Runtime run = Runtime.getRuntime();
@@ -528,7 +539,7 @@ public class NodesManagementServiceImpl implements NodesManagementService {
             process = run.exec(command);
             process.waitFor();
             process.destroy();
-            return "/var/nfs/"+productVersion+"/"+prefixName;
+            return filePath;
         } catch (IOException e) {
             e.printStackTrace();
         } catch (InterruptedException e) {
@@ -538,15 +549,15 @@ public class NodesManagementServiceImpl implements NodesManagementService {
     }
 
     private String to16(String ipString) {
-            String[] ip=ipString.split("\\.");
-            StringBuffer sb=new StringBuffer();
-            for (String str : ip) {
-                if(str.equals("0")) {
-                    sb.append("00");
-                }
-                sb.append(Integer.toHexString(Integer.parseInt(str)).toUpperCase());
+        String[] ip=ipString.split("\\.");
+        StringBuffer sb=new StringBuffer();
+        for (String str : ip) {
+            if(str.equals("0")) {
+                sb.append("00");
             }
-            return sb.toString();
+            sb.append(Integer.toHexString(Integer.parseInt(str)).toUpperCase());
+        }
+        return sb.toString();
     }
 
 //    private String hostIP() {

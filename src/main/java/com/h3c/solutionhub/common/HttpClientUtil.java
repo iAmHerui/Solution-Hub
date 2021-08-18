@@ -1,5 +1,6 @@
 package com.h3c.solutionhub.common;
 
+import com.h3c.solutionhub.entity.NodeBo;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -20,6 +21,7 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.List;
 
 /*
  * 利用HttpClient进行请求的工具类:支持http
@@ -53,13 +55,14 @@ public class HttpClientUtil {
 //            getHost("http://210.0.12.25:8080/cas/casrs/host/");
 
             String name = "hostPool_test";
-            String ip = "210.0.12.25";
-            Boolean result = isConnect(ip);
 
-                addHostPool(ip, name);
-                Long hostPoolId = getHostPoolIdByName(ip, name);
-                System.out.println(hostPoolId);
-                addCluster(ip, hostPoolId, "cluster_test");
+            String ip = "210.0.12.25";
+//            Boolean result = isConnect(ip);
+
+            addHostPool(ip, name);
+            Long hostPoolId = getHostPoolIdByName(ip, name);
+            System.out.println(hostPoolId);
+            addCluster(ip, hostPoolId, "cluster_test");
 
 //            Long clusterId = getClusterIdByName(ip,"cluster_test");
 //            addHost("root","Sys@1234",hostPoolId,clusterId,"210.0.12.26");
@@ -71,11 +74,11 @@ public class HttpClientUtil {
 
     private DefaultHttpClient newInstance(String managementIp) {
 //        if(client == null) {
-            client = new DefaultHttpClient();
-            client.getCredentialsProvider().setCredentials(
-                    new AuthScope(managementIp,8080,"VMC RESTful Web Services"),
-                    new UsernamePasswordCredentials("admin","Cloud@1234")
-            );
+        client = new DefaultHttpClient();
+        client.getCredentialsProvider().setCredentials(
+                new AuthScope(managementIp,8080,"VMC RESTful Web Services"),
+                new UsernamePasswordCredentials("admin","Cloud@1234")
+        );
 //        }
         return client;
     }
@@ -90,7 +93,7 @@ public class HttpClientUtil {
         try {
             response = client.execute(get);
         } catch (Exception e) {
-            e.printStackTrace();
+//            e.printStackTrace();
             return false;
         }
         int code = response.getStatusLine().getStatusCode();
@@ -187,20 +190,20 @@ public class HttpClientUtil {
         post.addHeader("Content-Type","application/xml");
         String xml =
                 "<cluster>\n" +
-                "    <hostPoolId>"+ hostPoolId +"</hostPoolId>\n" +
-                "    <name>"+ clusterName +"</name>\n" +
-                "    <description>Solution Hub Agent Create</description>\n" +
-                "    <enableHA>1</enableHA>\n" +
-                "    <priority>2</priority>\n" +
-                "    <enableLB>1</enableLB>\n" +
-                "    <persistTime>5</persistTime>\n" +
-                "    <checkInterval>10</checkInterval>\n" +
-                "    <enableIPM>0</enableIPM>\n" +
-                "    <persistTimeIPM>0</persistTimeIPM>\n" +
-                "    <checkIntervalIPM>0</checkIntervalIPM>\n" +
-                "    <lbMonitorId>4</lbMonitorId>\n" +
-                "    <HaMinHost>1</HaMinHost>\n" +
-                "</cluster>";
+                        "    <hostPoolId>"+ hostPoolId +"</hostPoolId>\n" +
+                        "    <name>"+ clusterName +"</name>\n" +
+                        "    <description>Solution Hub Agent Create</description>\n" +
+                        "    <enableHA>1</enableHA>\n" +
+                        "    <priority>2</priority>\n" +
+                        "    <enableLB>1</enableLB>\n" +
+                        "    <persistTime>5</persistTime>\n" +
+                        "    <checkInterval>10</checkInterval>\n" +
+                        "    <enableIPM>0</enableIPM>\n" +
+                        "    <persistTimeIPM>0</persistTimeIPM>\n" +
+                        "    <checkIntervalIPM>0</checkIntervalIPM>\n" +
+                        "    <lbMonitorId>4</lbMonitorId>\n" +
+                        "    <HaMinHost>1</HaMinHost>\n" +
+                        "</cluster>";
 
         StringEntity entity = new StringEntity(xml,"utf-8");
         post.setEntity(entity);
@@ -236,12 +239,13 @@ public class HttpClientUtil {
 
     // 增加主机
     public Boolean addHost(String userName,
-                            String password,
-                            Long hostPoolId,
-                            Long clusterId,
-                            String nodeManagementIp) throws Exception{
-        String url = "http://"+nodeManagementIp+":8080/cas/casrs/host/add";
-        DefaultHttpClient client = newInstance(nodeManagementIp);
+                           String password,
+                           Long hostPoolId,
+                           Long clusterId,
+                           String managementIp,
+                           String nodeManagementIp) throws Exception{
+        String url = "http://"+managementIp+":8080/cas/casrs/host/add";
+        DefaultHttpClient client = newInstance(managementIp);
         HttpPost post = new HttpPost(url);
 //        post.setHeader("Content-Type","text/xml;charset=UTF-8");
         post.addHeader("Content-Type","application/xml");
@@ -259,8 +263,11 @@ public class HttpClientUtil {
         post.setEntity(entity);
         HttpResponse response = client.execute(post);
         System.out.println(response.getStatusLine());
-
-        return true;
+        if(response.getStatusLine().getStatusCode()==200) {
+            return true;
+        } else {
+            return false;
+        }
     }
 
 }

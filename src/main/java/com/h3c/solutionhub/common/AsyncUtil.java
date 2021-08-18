@@ -1,6 +1,9 @@
 package com.h3c.solutionhub.common;
 
 import com.h3c.solutionhub.entity.NodeBo;
+import com.jcraft.jsch.JSch;
+import com.jcraft.jsch.JSchException;
+import com.jcraft.jsch.Session;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
@@ -26,6 +29,7 @@ public class AsyncUtil {
         log.info("Current Thread : {}",Thread.currentThread().getName());
 
         HttpClientUtil httpClientUtil = new HttpClientUtil();
+        Long hostPoolId = 0L;
 
         // 获取CVM managementIP
         String managementIp = "";
@@ -39,8 +43,7 @@ public class AsyncUtil {
             TimeUnit.SECONDS.sleep(10);
             if(httpClientUtil.isConnect(managementIp)) {
                 log.info("---------- CAS集群已连通,开始初始化 ----------");
-                Long hostPoolId = 0L;
-                Long clusterId = 0L;
+
                 for(NodeBo node:nodeList) {
                     if(node.getNodeType().equals("CAS_CVM")) {
                         httpClientUtil.addHostPool(managementIp,hostPoolName);
@@ -51,24 +54,40 @@ public class AsyncUtil {
 
                         httpClientUtil.addCluster(managementIp,hostPoolId,clusterName);
                         log.info("---------- 集群: "+clusterName+",已创建 ----------");
-
-                        clusterId = httpClientUtil.getClusterIdByName(managementIp,clusterName);
-                        log.info("---------- 集群ID: "+clusterId+",已获取 ----------");
                     }
                 }
-
-                // 添加主机
-                for(NodeBo node:nodeList) {
-                    // TODO 只需要添加CVK吗？
-                    if(node.getNodeType().equals("CAS_CVK")) {
-                        httpClientUtil.addHost(nodeManagementUserName,nodeManagementPassword,hostPoolId,clusterId,node.getManagementIP());
-                        log.info("---------- node: "+node.getNodeName()+",主机添加,SUCCESS ----------");
-                    }
-                }
-                log.info("---------- 配置集群 END ----------");
-                return;
+                break;
             }
-            log.info("---------- CAS集群未连通,sleep 10s ----------");
+            log.info("---------- CVM未连通,sleep 10s ----------");
+        }
+
+        log.info("---------- CVK正在部署,等待5min ----------");
+        TimeUnit.SECONDS.sleep(300);
+
+        while (true) {
+            Long clusterId = httpClientUtil.getClusterIdByName(managementIp,clusterName);
+            // 添加主机
+            for(NodeBo node:nodeList) {
+                try {
+                    Boolean result = httpClientUtil.addHost(nodeManagementUserName, nodeManagementPassword, hostPoolId, clusterId, managementIp,node.getManagementIP());
+                    if(result) {
+                        nodeList.remove(node);
+                        log.info("---------- node: "+node.getNodeName()+",主机添加,SUCCESS ----------");
+                    }else {
+                        log.info("---------- node: "+node.getNodeName()+",主机添加,FAILURE ----------");
+                    }
+                    if(nodeList.size()<=0) {
+                        log.info("---------- 配置集群 END ----------");
+                        return;
+                    }
+                } catch (Exception e) {
+                    log.info("---------- node: "+node.getNodeName()+",主机添加,FAILURE ----------");
+                }
+            }
+            log.info("---------- 添加主机,等待10s ----------");
+            TimeUnit.SECONDS.sleep(10);
         }
     }
+
+
 }

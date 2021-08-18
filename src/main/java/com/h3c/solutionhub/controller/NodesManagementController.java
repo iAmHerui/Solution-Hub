@@ -5,6 +5,9 @@ import com.alibaba.fastjson.JSONObject;
 import com.h3c.solutionhub.entity.DhcpBO;
 import com.h3c.solutionhub.entity.NodeBo;
 import com.h3c.solutionhub.service.NodesManagementService;
+import com.jcraft.jsch.JSch;
+import com.jcraft.jsch.JSchException;
+import com.jcraft.jsch.Session;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
@@ -207,5 +210,30 @@ public class NodesManagementController {
 //        return true;
 //    }
 
+    @ApiOperation(value = "测试CVK连通性",notes = "测试CVK连通性")
+    @CrossOrigin(origins ="*",maxAge =3600)
+    @GetMapping(value = "/isCVKConnect")
+    public Boolean isCVKConnect(String host,Integer port) {
+        Session session = null;
+        try {
+            JSch jsch = new JSch();
+
+            if(port != null){
+                session = jsch.getSession("root", host, port.intValue());
+            }else{
+                session = jsch.getSession("root", host);
+            }
+            session.setPassword("Password@_");
+            //设置第一次登陆的时候提示，可选值:(ask | yes | no)
+            session.setConfig("StrictHostKeyChecking", "no");
+            //5秒连接超时
+            session.connect(5000);
+
+        } catch (JSchException e) {
+            e.printStackTrace();
+            return false;
+        }
+        return true;
+    }
 
 }

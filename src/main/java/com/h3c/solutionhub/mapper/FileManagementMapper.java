@@ -22,8 +22,7 @@ public interface FileManagementMapper {
 
     String selectFilePath(@Param("fileName") String fileName);
 
-    String getISOName(@Param("productType") String productType,
-                      @Param("productVersion") String productVersion);
+    String getISOName(@Param("productVersion") String productVersion);
 
     List<String> selectAllProductType();
 
