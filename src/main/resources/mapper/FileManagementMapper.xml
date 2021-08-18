@@ -36,6 +36,12 @@
         DELETE FROM file_management WHERE name = #{fileName,jdbcType=VARCHAR}
     </delete>
 
+    <select id="selectFileName" resultType="int">
+        SELECT file_name
+        FROM file_management
+        WHERE id = #{fileId}
+    </select>
+
     <select id="selectFilePath" resultType="string">
         SELECT file_path
         FROM file_management

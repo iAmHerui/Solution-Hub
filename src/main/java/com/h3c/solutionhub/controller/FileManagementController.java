@@ -111,8 +111,8 @@ public class FileManagementController {
     @ApiOperation(value = "文件删除",notes = "文件删除")
     @CrossOrigin(origins ="*",maxAge =3600)
     @PostMapping(value = "/fileDelete")
-    public String fileDelete(String fileName) {
-        Boolean result = fileManagementService.deleteFileInfo(fileName);
+    public String fileDelete(int fileId) {
+        Boolean result = fileManagementService.deleteFileInfo(fileId);
         if(result==true) {
             return "文件删除成功";
         } else {

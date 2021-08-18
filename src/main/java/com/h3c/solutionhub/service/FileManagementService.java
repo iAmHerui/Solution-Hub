@@ -12,7 +12,7 @@ public interface FileManagementService {
 
     Boolean insertFileInfo(FileBO fileBO);
 
-    Boolean deleteFileInfo(String fileName);
+    Boolean deleteFileInfo(int fileId);
 
     Boolean mergeFile(String guid, FileBO fileBO);
 

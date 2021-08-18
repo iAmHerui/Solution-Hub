@@ -2,6 +2,7 @@ package com.h3c.solutionhub.controller;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.h3c.solutionhub.common.CommandUtil;
 import com.h3c.solutionhub.entity.DhcpBO;
 import com.h3c.solutionhub.entity.NodeBo;
 import com.h3c.solutionhub.service.NodesManagementService;
@@ -234,6 +235,47 @@ public class NodesManagementController {
             return false;
         }
         return true;
+    }
+
+    @ApiOperation(value = "执行copy",notes = "执行copy")
+    @CrossOrigin(origins ="*",maxAge =3600)
+    @GetMapping(value = "/commandResult")
+    public Boolean commandResult(String command) {
+//        String command = "cp -ru /var/nfs/mountpath/EE0710P06/* /var/nfs/EE0710P06/H3C_CAS-E0710P06-centos-x86_64/";
+        return execLinuxCommand(command);
+    }
+
+    @ApiOperation(value = "执行copy2",notes = "执行copy2")
+    @CrossOrigin(origins ="*",maxAge =3600)
+    @GetMapping(value = "/commandResult2")
+    public String commandResult2(String command) throws Exception{
+        List<String> commandArr = new ArrayList<>();
+        commandArr.add("/bin/sh");
+        commandArr.add("-c");
+        commandArr.add(command);
+
+        return CommandUtil.run(commandArr.toArray(new String[commandArr.size()]));
+
+    }
+
+    private Boolean execLinuxCommand(String command) {
+
+        log.info("mount command: "+command);
+
+        Runtime run = Runtime.getRuntime();
+        Process process = null;
+
+        try {
+            process = run.exec(command);
+            process.waitFor();
+            process.destroy();
+            return true;
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        return false;
     }
 
 }

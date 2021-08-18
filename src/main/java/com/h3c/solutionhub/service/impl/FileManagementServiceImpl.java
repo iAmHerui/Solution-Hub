@@ -65,7 +65,11 @@ public class FileManagementServiceImpl implements FileManagementService {
     }
 
     @Override
-    public Boolean deleteFileInfo(String fileName) {
+    public Boolean deleteFileInfo(int fileId) {
+
+        // 根据ID获取fileName
+        String fileName = fileManagementMapper.selectFileName(fileId);
+
         // 根据文件名查询文件所在目录
         String filePath = fileManagementMapper.selectFilePath(fileName);
 

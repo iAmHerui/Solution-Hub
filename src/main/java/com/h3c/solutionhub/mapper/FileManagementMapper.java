@@ -20,6 +20,8 @@ public interface FileManagementMapper {
 
     Boolean deleteFileInfo(@Param("fileName") String fileName);
 
+    String selectFileName(@Param("fileName") int fileId);
+
     String selectFilePath(@Param("fileName") String fileName);
 
     String getISOName(@Param("productVersion") String productVersion);
