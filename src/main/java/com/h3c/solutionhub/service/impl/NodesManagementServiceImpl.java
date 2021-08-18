@@ -1,6 +1,7 @@
 package com.h3c.solutionhub.service.impl;
 
 import com.h3c.solutionhub.common.AsyncUtil;
+import com.h3c.solutionhub.common.CommandUtil;
 import com.h3c.solutionhub.common.HttpsClientUtil;
 import com.h3c.solutionhub.entity.DhcpBO;
 import com.h3c.solutionhub.entity.NodeBo;
@@ -23,6 +24,7 @@ import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.nio.file.Files;
+import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
@@ -223,10 +225,22 @@ public class NodesManagementServiceImpl implements NodesManagementService {
         log.info("---------- mount iso,SUCCESS.mount dir = "+srcDir+" ----------");
 
 //        String copyCommand = "cp -r "+srcDir+" "+"/var/nfs/mountCopy";
-        String copyCommand = "cp -r "+"/var/nfs/mountCopy/"+productVersion+" "+srcDir;
+        String copyCommand = "cp -ru "+"/var/nfs/mountpath/"+productVersion+"/*"+" "+srcDir;
         log.info("---------- copy command: "+copyCommand+" ----------");
-        Boolean result = execLinuxCommand(copyCommand);
-        log.info("---------- copy command,SUCCESS.已拷贝到 /var/nfs/mountCopy ----------");
+
+        List<String> commandArr = new ArrayList<>();
+        commandArr.add("/bin/sh");
+        commandArr.add("-c");
+        commandArr.add(copyCommand);
+
+        try {
+            CommandUtil.run(commandArr.toArray(new String[commandArr.size()]));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+//        Boolean result = execLinuxCommand(copyCommand);
+        log.info("---------- copy command,SUCCESS.已拷贝到 /var/nfs/mountpath ----------");
 
         // 5.生成该节点的ks-auto.cfg文件,并进行替换相关文本
         // 5.1 生成Node ks-auto.cfg定制文件
@@ -516,7 +530,7 @@ public class NodesManagementServiceImpl implements NodesManagementService {
         String isoName = fileManagementMapper.getISOName(productVersion);
         String prefixName = isoName.substring(0,isoName.lastIndexOf("."));
 
-        String filePath = "/var/nfs/"+productVersion+"/"+prefixName;
+        String filePath = "/var/nfs/"+productVersion+"/"+prefixName+"/";
         File file = new File(filePath);
         if (!file.exists()) {
             file.mkdirs();
@@ -532,17 +546,15 @@ public class NodesManagementServiceImpl implements NodesManagementService {
         String command = "mount -t auto /var/iso/"+productVersion+"/"+isoName+" "+mountPath;
         log.info("---------- mount command: "+command+" ----------");
 
-        Runtime run = Runtime.getRuntime();
-        Process process = null;
+        List<String> commandArr = new ArrayList<>();
+        commandArr.add("/bin/sh");
+        commandArr.add("-c");
+        commandArr.add(command);
 
         try {
-            process = run.exec(command);
-            process.waitFor();
-            process.destroy();
+            CommandUtil.run(commandArr.toArray(new String[commandArr.size()]));
             return filePath;
         } catch (IOException e) {
-            e.printStackTrace();
-        } catch (InterruptedException e) {
             e.printStackTrace();
         }
         return "";

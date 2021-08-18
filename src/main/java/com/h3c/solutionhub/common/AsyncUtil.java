@@ -61,8 +61,8 @@ public class AsyncUtil {
             log.info("---------- CVM未连通,sleep 10s ----------");
         }
 
-        log.info("---------- CVK正在部署,等待5min ----------");
-        TimeUnit.SECONDS.sleep(300);
+        log.info("---------- CVK正在部署,等待3min ----------");
+        TimeUnit.SECONDS.sleep(180);
 
         while (true) {
             Long clusterId = httpClientUtil.getClusterIdByName(managementIp,clusterName);
