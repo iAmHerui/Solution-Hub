@@ -218,7 +218,7 @@ public class HttpClientUtil {
         DefaultHttpClient client = newInstance(managementIp);
         HttpGet get = new HttpGet(url);
         HttpResponse response = client.execute(get);
-        System.out.println(response.getStatusLine());
+//        System.out.println(response.getStatusLine());
 
         HttpEntity entity = response.getEntity();
         if(null != entity) {

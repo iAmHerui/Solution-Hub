@@ -33,10 +33,10 @@
     </insert>
 
     <delete id="deleteFileInfo">
-        DELETE FROM file_management WHERE name = #{fileName,jdbcType=VARCHAR}
+        DELETE FROM file_management WHERE id = #{fileId}
     </delete>
 
-    <select id="selectFileName" resultType="int">
+    <select id="selectFileName" resultType="string">
         SELECT file_name
         FROM file_management
         WHERE id = #{fileId}
@@ -45,7 +45,7 @@
     <select id="selectFilePath" resultType="string">
         SELECT file_path
         FROM file_management
-        WHERE file_name = #{fileName}
+        WHERE id = #{fileId}
     </select>
 
     <select id="getISOName" resultType="string">

@@ -34,14 +34,14 @@ public class FileManagementServiceImpl implements FileManagementService {
 
         // iso和cfg要放在不同的目录下
         if(suffix.equals("iso")) {
-                String filePath = tempFilePath+"iso/"+productVersion;
-                destTempFile = new File(filePath,fileName);
+            String filePath = tempFilePath+"iso/"+productVersion;
+            destTempFile = new File(filePath,fileName);
         } else if(suffix.equals("cfg")) {
-                String filePath = tempFilePath+"nfs/ks/"+productVersion;
-                destTempFile = new File(filePath,fileName);
+            String filePath = tempFilePath+"nfs/ks/"+productVersion;
+            destTempFile = new File(filePath,fileName);
         } else {
-                String filePath = tempFilePath+"temp/"+productVersion;
-                destTempFile = new File(filePath,fileName);
+            String filePath = tempFilePath+"temp/"+productVersion;
+            destTempFile = new File(filePath,fileName);
         }
         return destTempFile.exists();
     }
@@ -71,13 +71,13 @@ public class FileManagementServiceImpl implements FileManagementService {
         String fileName = fileManagementMapper.selectFileName(fileId);
 
         // 根据文件名查询文件所在目录
-        String filePath = fileManagementMapper.selectFilePath(fileName);
+        String filePath = fileManagementMapper.selectFilePath(fileId);
 
         // 删除文件
-        File file = new File(filePath+fileName);
+        File file = new File(filePath+"/"+fileName);
         if(file.delete()) {
             // 删除文件所在数据库数据
-            return fileManagementMapper.deleteFileInfo(fileName);
+            return fileManagementMapper.deleteFileInfo(fileId);
         }
         return false;
     }

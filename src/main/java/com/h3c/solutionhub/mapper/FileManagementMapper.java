@@ -18,11 +18,11 @@ public interface FileManagementMapper {
                            @Param("fileSize") int fileSize,
                            @Param("filePath") String filePath);
 
-    Boolean deleteFileInfo(@Param("fileName") String fileName);
+    Boolean deleteFileInfo(@Param("fileId") int fileId);
 
-    String selectFileName(@Param("fileName") int fileId);
+    String selectFileName(@Param("fileId") int fileId);
 
-    String selectFilePath(@Param("fileName") String fileName);
+    String selectFilePath(@Param("fileId") int fileId);
 
     String getISOName(@Param("productVersion") String productVersion);
 
