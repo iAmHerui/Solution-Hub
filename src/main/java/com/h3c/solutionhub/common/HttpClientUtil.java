@@ -329,7 +329,7 @@ public class HttpClientUtil {
             NodeList uriNode1 = rootElement.getElementsByTagName("completed");
             Element element1 = (Element) uriNode1.item(0);
             log.info(element1.getTextContent());
-            return Boolean.getBoolean(element1.getTextContent());
+            return Boolean.valueOf(element1.getTextContent());
         }
         return false;
     }
