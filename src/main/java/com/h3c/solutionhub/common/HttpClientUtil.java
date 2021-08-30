@@ -2,6 +2,7 @@ package com.h3c.solutionhub.common;
 
 import com.h3c.solutionhub.entity.NodeBo;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.auth.AuthScope;
@@ -22,6 +23,7 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 /*
  * 利用HttpClient进行请求的工具类:支持http
@@ -54,19 +56,21 @@ public class HttpClientUtil {
 //            /* 获取所有主机列表 */
 //            getHost("http://210.0.12.25:8080/cas/casrs/host/");
 
-            String name = "hostPool_test";
+//            String name = "sd";
+//
+//            String ip = "210.0.12.27";
+////            Boolean result = isConnect(ip);
+//
+////            addHostPool(ip, name);
+//            Long hostPoolId = getHostPoolIdByName(ip, name);
+//            System.out.println(hostPoolId);
+////            addCluster(ip, hostPoolId, "cluster_test");
+//
+//            Long clusterId = getClusterIdByName(ip,"xx");
+//            addHost("root","Sys@1234",hostPoolId,clusterId,"210.0.12.27","210.0.12.26");
+////            System.out.println(clusterId);
 
-            String ip = "210.0.12.25";
-//            Boolean result = isConnect(ip);
-
-            addHostPool(ip, name);
-            Long hostPoolId = getHostPoolIdByName(ip, name);
-            System.out.println(hostPoolId);
-            addCluster(ip, hostPoolId, "cluster_test");
-
-//            Long clusterId = getClusterIdByName(ip,"cluster_test");
-//            addHost("root","Sys@1234",hostPoolId,clusterId,"210.0.12.26");
-//            System.out.println(clusterId);
+            queryMsgInfo("210.0.12.27",1630044972237l);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -262,12 +266,72 @@ public class HttpClientUtil {
         StringEntity entity = new StringEntity(xml,"utf-8");
         post.setEntity(entity);
         HttpResponse response = client.execute(post);
-        System.out.println(response.getStatusLine());
-        if(response.getStatusLine().getStatusCode()==200) {
-            return true;
-        } else {
-            return false;
+        log.info("添加主机,http状态码: "+response.getStatusLine());
+
+        HttpEntity httpEntity = response.getEntity();
+
+        // 获取任务ID
+        if(null != httpEntity) {
+            InputStream in = httpEntity.getContent();
+
+            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+            DocumentBuilder builder = factory.newDocumentBuilder();
+            Document document = builder.parse(in);
+            document.getDocumentElement().normalize();
+
+            Element rootElement = document.getDocumentElement();
+            NodeList uriNode = rootElement.getElementsByTagName("msgId");
+            Element element = (Element) uriNode.item(0);
+            Long msgId = Long.valueOf(element.getTextContent());
+            log.info("任务ID: "+msgId);
+
+
+            log.info("主机添加任务已下发,等待1min 查看任务状态");
+            TimeUnit.SECONDS.sleep(60);
+
+            // 增加“检测任务是否成功”,最多重试5次
+            int count = 5;
+            for(int i =1;i<=count;i++) {
+                Boolean result = queryMsgInfo(managementIp,msgId);
+                log.info("检测添加主机任务,第 "+i+" 次,检测结果: "+result);
+                if(result) {
+                    return true;
+                } else {
+                    // 任务未执行成功,等待1min
+                    TimeUnit.SECONDS.sleep(60);
+                }
+            }
         }
+        return false;
+    }
+
+    // 查询任务详细信息
+    public Boolean queryMsgInfo(String managementIp,Long msgId) throws Exception {
+        String url = "http://"+managementIp+":8080/cas/casrs/message/"+msgId;
+        DefaultHttpClient client = newInstance(managementIp);
+        HttpGet get = new HttpGet(url);
+        HttpResponse response = client.execute(get);
+        HttpEntity httpEntity = response.getEntity();
+
+        // 获取任务ID
+        if(null != httpEntity) {
+            InputStream in = httpEntity.getContent();
+
+            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+            DocumentBuilder builder = factory.newDocumentBuilder();
+            Document document = builder.parse(in);
+            document.getDocumentElement().normalize();
+
+            Element rootElement = document.getDocumentElement();
+            NodeList uriNode = rootElement.getElementsByTagName("detail");
+            Element element = (Element) uriNode.item(0);
+            log.info(element.getTextContent());
+            NodeList uriNode1 = rootElement.getElementsByTagName("completed");
+            Element element1 = (Element) uriNode1.item(0);
+            log.info(element1.getTextContent());
+            return Boolean.getBoolean(element1.getTextContent());
+        }
+        return false;
     }
 
 }

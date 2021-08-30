@@ -219,7 +219,7 @@ public class NodesManagementServiceImpl implements NodesManagementService {
         log.info("---------- 节点信息添加到dhcpd.conf,SUCCESS ----------");
 
         execDHCPCommand();
-        log.error("---------- DHCP restart,SUCCESS ----------");
+        log.info("---------- DHCP restart,SUCCESS ----------");
 
         String srcDir = execLinuxCommand(productType, productVersion);
         log.info("---------- mount iso,SUCCESS.mount dir = "+srcDir+" ----------");

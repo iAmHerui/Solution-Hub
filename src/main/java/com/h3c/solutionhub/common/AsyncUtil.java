@@ -40,7 +40,8 @@ public class AsyncUtil {
         }
 
         while (true) {
-            TimeUnit.SECONDS.sleep(10);
+            log.info("---------- CVM正在部署,sleep 3min ----------");
+            TimeUnit.SECONDS.sleep(180);
             if(httpClientUtil.isConnect(managementIp)) {
                 log.info("---------- CAS集群已连通,开始初始化 ----------");
 
@@ -58,11 +59,7 @@ public class AsyncUtil {
                 }
                 break;
             }
-            log.info("---------- CVM未连通,sleep 10s ----------");
         }
-
-        log.info("---------- CVK正在部署,等待3min ----------");
-        TimeUnit.SECONDS.sleep(180);
 
         while (true) {
             Long clusterId = httpClientUtil.getClusterIdByName(managementIp,clusterName);
@@ -84,8 +81,8 @@ public class AsyncUtil {
                     log.info("---------- node: "+node.getNodeName()+",主机添加,FAILURE ----------");
                 }
             }
-            log.info("---------- 添加主机,等待10s ----------");
-            TimeUnit.SECONDS.sleep(10);
+            log.info("---------- 主机仍在部署,等待3min ----------");
+            TimeUnit.SECONDS.sleep(180);
         }
     }
 
