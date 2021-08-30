@@ -266,39 +266,40 @@ public class HttpClientUtil {
         StringEntity entity = new StringEntity(xml,"utf-8");
         post.setEntity(entity);
         HttpResponse response = client.execute(post);
-        log.info("添加主机,http状态码: "+response.getStatusLine());
+        log.info("添加主机 "+nodeManagementIp+" ,http状态码: "+response.getStatusLine());
 
-        HttpEntity httpEntity = response.getEntity();
-
-        // 获取任务ID
-        if(null != httpEntity) {
-            InputStream in = httpEntity.getContent();
-
-            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-            DocumentBuilder builder = factory.newDocumentBuilder();
-            Document document = builder.parse(in);
-            document.getDocumentElement().normalize();
-
-            Element rootElement = document.getDocumentElement();
-            NodeList uriNode = rootElement.getElementsByTagName("msgId");
-            Element element = (Element) uriNode.item(0);
-            Long msgId = Long.valueOf(element.getTextContent());
-            log.info("任务ID: "+msgId);
-
+        if(response.getStatusLine().getStatusCode()==200) {
+            HttpEntity httpEntity = response.getEntity();
 
             log.info("主机添加任务已下发,等待1min 查看任务状态");
             TimeUnit.SECONDS.sleep(60);
 
-            // 增加“检测任务是否成功”,最多重试5次
-            int count = 5;
-            for(int i =1;i<=count;i++) {
-                Boolean result = queryMsgInfo(managementIp,msgId);
-                log.info("检测添加主机任务,第 "+i+" 次,检测结果: "+result);
-                if(result) {
-                    return true;
-                } else {
-                    // 任务未执行成功,等待1min
-                    TimeUnit.SECONDS.sleep(60);
+            // 获取任务ID
+            if(null != httpEntity) {
+                InputStream in = httpEntity.getContent();
+
+                DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+                DocumentBuilder builder = factory.newDocumentBuilder();
+                Document document = builder.parse(in);
+                document.getDocumentElement().normalize();
+
+                Element rootElement = document.getDocumentElement();
+                NodeList uriNode = rootElement.getElementsByTagName("msgId");
+                Element element = (Element) uriNode.item(0);
+                Long msgId = Long.valueOf(element.getTextContent());
+                log.info("任务ID: "+msgId);
+
+                // 增加“检测任务是否成功”,最多重试5次
+                int count = 5;
+                for(int i =1;i<=count;i++) {
+                    Boolean result = queryMsgInfo(managementIp,msgId);
+                    log.info("检测添加主机任务,第 "+i+" 次,检测结果: "+result);
+                    if(result) {
+                        return true;
+                    } else {
+                        // 任务未执行成功,等待1min
+                        TimeUnit.SECONDS.sleep(60);
+                    }
                 }
             }
         }
