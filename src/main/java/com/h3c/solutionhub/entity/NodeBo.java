@@ -62,4 +62,7 @@ public class NodeBo {
     // 存储管理网关
     private String storageGateway;
 
+    // 节点部署状态
+    private Boolean nodeDeployStatus = false;
+
 }

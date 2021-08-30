@@ -66,21 +66,33 @@ public class AsyncUtil {
             // 添加主机
             for(NodeBo node:nodeList) {
                 try {
-                    Boolean result = httpClientUtil.addHost(nodeManagementUserName, nodeManagementPassword, hostPoolId, clusterId, managementIp,node.getManagementIP());
-                    if(result) {
-                        nodeList.remove(node);
-                        log.info("---------- node: "+node.getNodeName()+",主机添加,SUCCESS ----------");
-                    }else {
-                        log.info("---------- node: "+node.getNodeName()+",主机添加,FAILURE ----------");
-                    }
-                    if(nodeList.size()<=0) {
-                        log.info("---------- 配置集群 END ----------");
-                        return;
+                    if(!node.getNodeDeployStatus()) {
+                        Boolean result = httpClientUtil.addHost(nodeManagementUserName, nodeManagementPassword, hostPoolId, clusterId, managementIp, node.getManagementIP());
+                        if (result) {
+                            // 主机添加成功,修改主机添加状态
+                            node.setNodeDeployStatus(true);
+                            log.info("---------- node: " + node.getNodeName() + ",主机添加,SUCCESS ----------");
+                        } else {
+                            log.info("---------- node: " + node.getNodeName() + ",主机添加,FAILURE ----------");
+                        }
                     }
                 } catch (Exception e) {
                     log.info("---------- node: "+node.getNodeName()+",主机添加,FAILURE ----------");
                 }
             }
+
+            // 主机全部添加完成,退出部署
+            Boolean isExit = true;
+            for(NodeBo node:nodeList) {
+                if(!node.getNodeDeployStatus()) {
+                    isExit = false;
+                }
+            }
+            if(isExit) {
+                log.info("集群部署完成");
+                return;
+            }
+
             log.info("---------- 主机仍在部署,等待3min ----------");
             TimeUnit.SECONDS.sleep(180);
         }
