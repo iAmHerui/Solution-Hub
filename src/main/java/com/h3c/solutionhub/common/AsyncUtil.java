@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
+import java.util.Date;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -27,6 +28,9 @@ public class AsyncUtil {
 
         log.info("---------- 配置集群 BEGIN ----------");
         log.info("Current Thread : {}",Thread.currentThread().getName());
+
+        Date startTime = new Date();
+        log.info("配置集群,启动时间: "+startTime);
 
         HttpClientUtil httpClientUtil = new HttpClientUtil();
         Long hostPoolId = 0L;
@@ -59,6 +63,7 @@ public class AsyncUtil {
                 }
                 break;
             }
+            checkTime(startTime);
         }
 
         while (true) {
@@ -95,6 +100,18 @@ public class AsyncUtil {
 
             log.info("---------- 主机仍在部署,等待3min ----------");
             TimeUnit.SECONDS.sleep(180);
+            checkTime(startTime);
+        }
+    }
+
+    // 检测部署时长,最大部署时间1h,超时强行退出
+    private void checkTime(Date startTime) {
+        // 获取当前时间
+        Date now = new Date();
+
+        if(now.getTime()-startTime.getTime()>60*60*1000) {
+            log.warn("配置集群超时,强制退出！");
+            return;
         }
     }
 
