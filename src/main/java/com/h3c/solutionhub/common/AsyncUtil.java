@@ -63,7 +63,13 @@ public class AsyncUtil {
                 }
                 break;
             }
-            checkTime(startTime);
+
+            // 获取当前时间
+            Date now = new Date();
+            if(now.getTime()-startTime.getTime()>60*60*1000) {
+                log.warn("配置集群超时,强制退出！");
+                return;
+            }
         }
 
         while (true) {
@@ -100,20 +106,26 @@ public class AsyncUtil {
 
             log.info("---------- 主机仍在部署,等待3min ----------");
             TimeUnit.SECONDS.sleep(180);
-            checkTime(startTime);
+
+            // 获取当前时间
+            Date now = new Date();
+            if(now.getTime()-startTime.getTime()>60*60*1000) {
+                log.warn("配置集群超时,强制退出！");
+                return;
+            }
         }
     }
 
-    // 检测部署时长,最大部署时间1h,超时强行退出
-    private void checkTime(Date startTime) {
-        // 获取当前时间
-        Date now = new Date();
-
-        if(now.getTime()-startTime.getTime()>60*60*1000) {
-            log.warn("配置集群超时,强制退出！");
-            System.exit(0);
-        }
-    }
+//    // 检测部署时长,最大部署时间1h,超时强行退出
+//    private void checkTime(Date startTime) {
+//        // 获取当前时间
+//        Date now = new Date();
+//
+//        if(now.getTime()-startTime.getTime()>60*60*1000) {
+//            log.warn("配置集群超时,强制退出！");
+//            System.exit(0);
+//        }
+//    }
 
 
 }
