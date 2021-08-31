@@ -12,6 +12,7 @@ import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.util.EntityUtils;
+import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -564,10 +565,15 @@ public class NodesManagementServiceImpl implements NodesManagementService {
         String[] ip=ipString.split("\\.");
         StringBuffer sb=new StringBuffer();
         for (String str : ip) {
-            if(str.equals("0")) {
+            String piece = Integer.toHexString(Integer.parseInt(str)).toUpperCase();
+
+            if(piece.equals("0")) {
                 sb.append("00");
+            } else if(piece.length()==1) {
+                sb.append("0"+piece);
+            } else {
+                sb.append(piece);
             }
-            sb.append(Integer.toHexString(Integer.parseInt(str)).toUpperCase());
         }
         return sb.toString();
     }

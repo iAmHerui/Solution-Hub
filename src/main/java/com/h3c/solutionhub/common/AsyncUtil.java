@@ -111,7 +111,7 @@ public class AsyncUtil {
 
         if(now.getTime()-startTime.getTime()>60*60*1000) {
             log.warn("配置集群超时,强制退出！");
-            return;
+            System.exit(0);
         }
     }
 
